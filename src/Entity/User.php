@@ -4,13 +4,11 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\AdvancedUserInterface;
-use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Security\Core\User\EquatableInterface;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UsersRepository")
  */
-class Users implements AdvancedUserInterface, \Serializable
+class User implements AdvancedUserInterface, \Serializable
 {
     /**
      * @ORM\Id
@@ -30,10 +28,6 @@ class Users implements AdvancedUserInterface, \Serializable
      *     length = 100,
      *     unique = true,
      *     )
-     *@Assert\Email(
-     *     message = "The email '{{ value }}' is not a valid email.",
-     *     checkMX = true
-     * )
      */
     private $email;
 
