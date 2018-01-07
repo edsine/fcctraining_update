@@ -1,0 +1,137 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block body %}
+
+    <section class="dashboard-counts p-0 mb-4">
+
+            <div class="row bg-white has-shadow">
+
+                <div class="col-xl-3 col-sm-6">
+                    <div class="item align-items-center">
+                        <div class="title"><span>Total payments</span>
+                            <div class="number font-black"><strong>&#8358;{{ (total_card + total_cash)|number_format }}</strong></div>
+                    </div>
+
+                  </div>
+                </div>
+
+                <div class="col-xl-3 col-sm-6">
+                    <div class="item align-items-center">
+                        <div class="title"><span>Cash payments</span>
+                            <div class="number font-black"><strong>&#8358;{{ total_cash|number_format }}</strong></div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-sm-6">
+                    <div class="item align-items-center">
+                        <div class="title"><span>Card payments</span>
+                            <div class="number font-black"><strong>&#8358;{{ total_card|number_format }}</strong></div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-sm-6">
+                    <div class="item align-items-center">
+                        <div class="title"><span>Outstanding</span>
+                            <div class="number font-black"><strong>{{ total_undertaken|number_format }}</strong></div>
+                        </div>
+
+                    </div>
+                </div>
+
+              </div>
+
+          </section>
+
+
+            <div class="card">
+                <div class="card-header bg-dark font-white">
+                    <h4>Payments</h4>
+                </div>
+                <div class="card-body">
+
+                    <table id="example" class="datatable table display table-bordered table-striped table-hover" cellspacing="0" width="100%">
+                        <thead >
+                        <tr>
+                            <th>Participant</th>
+                            <th>MDA code</th>
+                            <th>Training</th>
+                            <th>Amount paid</th>
+                            <th>Payment method</th>
+                            <th>Payment status</th>
+                            <th>Payment date</th>
+                            <th>Options</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for participant in training_participants %}
+                            <tr>
+                                <td>{{ participant.participant }}</td>
+                                <td>{{ participant.mda }}</td>
+                                <td><a href="{{ path('admin_training_participants', { 'id':participant.training_id }) }}">{{ participant.training_title }}</a></td>
+                                <td>&#8358;{{ participant.amountpaid|number_format }}</td>
+                                <td>{{ participant.paymentmethod }}</td>
+                                <td>
+                                    {% if participant.paymentstatus == 1 %}
+                                        <div class="badge badge-success font-xs">Paid</div>
+
+                                    {% else %}
+
+                                        <div class="badge badge-danger font-xs">Not Paid</div>
+
+                                    {% endif %}
+                                </td>
+                                <td>{{ participant.paymentdate|date("l, F j Y H:i:s") }}</td>
+                                <td></td>
+                            </tr>
+
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+
+    <div class="card">
+        <div class="card-header bg-dark font-white">
+            <h4>Outstanding payments</h4>
+        </div>
+        <div class="card-body">
+
+            <table id="example" class="datatable table display table-bordered table-striped table-hover" cellspacing="0" width="100%">
+                <thead >
+                <tr>
+                    <th>Participant</th>
+                    <th>MDA code</th>
+                    <th>Training</th>
+                    <th>Outstanding amount</th>
+
+                    <th>Options</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for participant in outstanding_participants %}
+                    <tr>
+                        <td>{{ participant.participant }}</td>
+                        <td>{{ participant.mda }}</td>
+                        <td><a href="{{ path('admin_training_participants', { 'id':participant.training_id }) }}">{{ participant.training_title }}</a></td>
+                        <td>&#8358;{{ participant.outstandingamount|number_format }}</td>
+
+
+                        <td></td>
+                    </tr>
+
+                {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+
+
+{% endblock %}

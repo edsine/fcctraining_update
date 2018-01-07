@@ -1,0 +1,118 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block body %}
+
+    <div class="card">
+        <div class="card-body">
+            <h1 class="m-0 font-weight-100">{{ participant.firstname }} {{ participant.lastname }}</h1>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="col-lg-4">
+
+
+            <div class="checklist card">
+                <div class="card-header bg-primary font-white">
+                    <h4>Participant information</h4>
+                </div>
+                <div class="card-body p-0">
+                    <div class="item">
+                        <b>First name:</b> <span class="float-right">{{ participant.firstname }}</span>
+                    </div>
+                    <div class="item">
+                        <b>Last name:</b> <span class="float-right">{{ participant.lastname }}</span>
+                    </div>
+                    <div class="item">
+                        <b>Phone:</b> <span class="float-right">{{ participant.phone }}</span>
+                    </div>
+                    <div class="item">
+                        <b>Email:</b> <span class="float-right">{{ participant.email }}</span>
+                    </div>
+                </div>
+            </div>
+
+                <div class="checklist card">
+                    <div class="card-header bg-primary font-white">
+                        <h4>MDA information</h4>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="item">
+                            <b>MDA code:</b> <span class="badge badge-danger font-sm float-right">{{ mda.mdacode }}</span>
+                        </div>
+                        <div class="item">
+                            <b>Name:</b> <span class="float-right">{{ mda.name }}</span>
+                        </div>
+                        <div class="item">
+                            <b>Address:</b> <span class="float-right">{{ mda.address }}</span>
+                        </div>
+                        <div class="item">
+                            <b>Phone:</b> <span class="float-right">{{ mda.phone }}</span>
+                        </div>
+                        <div class="item">
+                            <b>Email:</b> <span class="float-right">{{ mda.email }}</span>
+                        </div>
+                    </div>
+                </div>
+
+
+
+        </div>
+
+
+
+
+        <div class="col-lg-8">
+
+            <div class="card">
+                <div class="card-header bg-info font-white">
+                    <h4>Trainings applied for</h4>
+                </div>
+                <div class="card-body">
+
+                    <table id="example" class="datatable table display table-striped table-hover" cellspacing="0" width="100%">
+                        <thead >
+                        <tr>
+                            <th>Title</th>
+                            <th>Venue</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Individual amount</th>
+                            <th>Extra personel amount</th>
+
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for training in trainings %}
+                            <tr>
+                                <td><a href="{{ path('admin_training_participants', { 'id':training.id }) }}">{{ training.title }}</a></td>
+                                <td>{{ training.venue }}</td>
+                                <td>{{ training.date|date("l, F j Y") }}</td>
+                                <td>{{ training.time|date("H:i:s") }}</td>
+                                <td>&#8358;{{ training.individualamount|number_format }}</td>
+                                <td>&#8358;{{ training.extrapersonnelamount|number_format }}</td>
+
+                            </tr>
+
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-success font-white">
+                    <h4>Payments</h4>
+                </div>
+                <div class="card-body">
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+{% endblock %}

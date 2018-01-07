@@ -1,0 +1,33 @@
+html {
+  font-size: 88%; }
+
+.btn-xs {
+  padding: 3px 10px !important;
+  font-size: .92em !Important; }
+
+#navbar4 .navbar-nav .nav-item.active {
+  background: rgba(0, 0, 0, 0.2) !important;
+  border-radius: 6px; }
+
+.hline {
+  overflow: hidden;
+  text-align: center; }
+
+.hline:before, .hline:after {
+  background-color: gainsboro;
+  content: "";
+  display: inline-block;
+  height: 1px;
+  position: relative;
+  vertical-align: middle;
+  width: 50%; }
+
+.hline:before {
+  right: 0.5em;
+  margin-left: -50%; }
+
+.hline:after {
+  left: 0.5em;
+  margin-right: -50%; }
+
+/*# sourceMappingURL=style.css.map */
