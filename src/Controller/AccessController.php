@@ -8,24 +8,20 @@ use App\Entity\Mda;
 use App\Entity\MdaParticipant;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class AccessController extends Controller
 {
     /**
-     * @Route("/", name="home")
+     * @Route("/login", name="login")
      */
-    public function index(Request $request, AuthenticationUtils $authUtils)
+    public function index(AuthenticationUtils $authUtils)
     {
 
         // get the login error if there is one
@@ -71,9 +67,6 @@ class AccessController extends Controller
         {
 
             $mda_code = $form["Mda_Code"]->getData();
-
-
-            $em = $this->getDoctrine()->getManager();
 
 
             $mda = $this->getDoctrine()
@@ -187,7 +180,7 @@ class AccessController extends Controller
             $em->persist($user);
             $em->flush();
 
-            return $this->redirectToRoute('home');
+            return $this->redirectToRoute('login');
 
         }
 
@@ -203,12 +196,12 @@ class AccessController extends Controller
      * Redirect users after login based on the granted ROLE
      * @Route("/login/redirect", name="_login_redirect")
      */
-    public function loginRedirectAction(Request $request)
+    public function loginRedirectAction()
     {
 
         if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY'))
         {
-            return $this->redirectToRoute('home');
+            return $this->redirectToRoute('login');
             // throw $this->createAccessDeniedException();
         }
 
@@ -222,7 +215,7 @@ class AccessController extends Controller
         }
         else
         {
-            return $this->redirectToRoute('home');
+            return $this->redirectToRoute('login');
         }
 
     }

@@ -5,9 +5,22 @@ html {
   padding: 3px 10px !important;
   font-size: .92em !Important; }
 
-#navbar4 .navbar-nav .nav-item.active {
-  background: rgba(0, 0, 0, 0.2) !important;
+.line-height {
+  line-height: 25px; }
+
+header .navbar-nav .nav-item {
   border-radius: 6px; }
+  header .navbar-nav .nav-item.active {
+    background: rgba(255, 255, 255, 0.7) !important; }
+    header .navbar-nav .nav-item.active a {
+      color: #000 !Important; }
+  header .navbar-nav .nav-item:hover {
+    background: rgba(0, 0, 0, 0.2); }
+  header .navbar-nav .nav-item a {
+    padding: 5px 10px !Important;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #fff !Important; }
 
 .hline {
   overflow: hidden;

@@ -17,7 +17,7 @@
 
             <div class="p-4">
                 <h4 class="mb-5">Sign In</h4>
-                <form action="{{ path('home') }}" method="POST">
+                <form action="{{ path('login') }}" method="POST">
                     <div class="form-group">
                         <label>Email</label>
                         <input type="text" id="username" class="form-control form-control-lg" name="_username" value="{{ last_username }}" />
@@ -35,7 +35,7 @@
 
                 <p class="hline font-xs font-gray mb-4 mt-4"> OR </p>
 
-                <p class="text-center">Click <a href="{{ path('verify_mda') }}">here<a/> to register as an MDA Admin</a>
+                <p class="text-center">Click <a href="{{ path('verify_mda') }}">here</a> to register as an MDA Admin</p>
 
             </div>
 

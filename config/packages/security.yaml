@@ -28,8 +28,8 @@ security:
             pattern: ^/
             anonymous: ~
             form_login:
-                login_path: home
-                check_path: home
+                login_path: login
+                check_path: login
                 default_target_path: /login/redirect
             http_basic: ~
             provider: chain_provider
@@ -38,10 +38,8 @@ security:
                 target: /
 
     access_control:
-         - { path: ^/, roles: IS_AUTHENTICATED_ANONYMOUSLY }
          - { path: ^/user/*, roles: ROLE_USER }
          - { path: ^/admin/*, roles: ROLE_ADMIN }
-         - { path: ^/admin/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
 
             # activate different ways to authenticate
 
