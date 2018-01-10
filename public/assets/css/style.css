@@ -43,4 +43,17 @@ header .navbar-nav .nav-item {
   left: 0.5em;
   margin-right: -50%; }
 
+@media print {
+  #letter {
+    padding: 70px !important; }
+
+  #letter p font, #letter p font b, #letter p b u, #letter p b {
+    font-family: "Times New Roman" !important;
+    font-size: 16px !Important; }
+
+  #letter p {
+    font-size: 16px !Important;
+    margin-bottom: 20px !Important;
+    text-align: justify !Important; } }
+
 /*# sourceMappingURL=style.css.map */

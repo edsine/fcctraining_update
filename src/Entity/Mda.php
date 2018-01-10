@@ -32,19 +32,25 @@ class Mda
      * @ORM\Column(type="string",
      *     length = 100,
      *     unique = true,
+     *     nullable = true
      *     )
      */
     private $email;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="text", nullable = true)
      */
     private $address;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="string", nullable = true)
      */
     private $phone;
+
+    /**
+     * @ORM\Column(type="string", nullable = true)
+     */
+    private $top_official_designation;
 
     /**
      * @return mixed
@@ -140,6 +146,22 @@ class Mda
     public function setPhone($phone): void
     {
         $this->phone = $phone;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTopOfficialDesignation()
+    {
+        return $this->top_official_designation;
+    }
+
+    /**
+     * @param mixed $top_official_designation
+     */
+    public function setTopOfficialDesignation($top_official_designation): void
+    {
+        $this->top_official_designation = $top_official_designation;
     }
 
 

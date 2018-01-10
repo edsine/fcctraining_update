@@ -39,6 +39,11 @@ class Training
     /**
      * @ORM\Column(type="integer")
      */
+    private $registration_fee;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
     private $individual_amount;
 
     /**
@@ -50,6 +55,11 @@ class Training
      * @ORM\Column(type="integer")
      */
     private $individuals_per_mda;
+
+    /**
+     * @ORM\Column(type="text")
+     */
+    private $letter_content;
 
     /**
      * @return mixed
@@ -178,6 +188,43 @@ class Training
     {
         $this->individuals_per_mda = $individuals_per_mda;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getRegistrationFee()
+    {
+        return $this->registration_fee;
+    }
+
+    /**
+     * @param mixed $registration_fee
+     */
+    public function setRegistrationFee($registration_fee): void
+    {
+        $this->registration_fee = $registration_fee;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLetterContent()
+    {
+        return $this->letter_content;
+    }
+
+    /**
+     * @param mixed $letter_content
+     */
+    public function setLetterContent($letter_content): void
+    {
+        $this->letter_content = $letter_content;
+    }
+
+
+
+
+
 
 
 }

@@ -9,6 +9,15 @@ function isNumber(evt) {
 
 $(document).ready(function() {
 
+
+    $('textarea').summernote({
+        tabsize: 2,
+        height: 400
+    });
+
+
+    $('select').select2();
+
     $('.datatable').DataTable();
 
 $( ".datepicker" ).datepicker({ dateFormat: 'yy-mm-dd',  minDate: "0"  });
@@ -17,6 +26,35 @@ timeago().render($('.time_ago'));
 
 
 });
+
+
+
+function printContent(el){
+    var restorepage = $('body').html();
+    var printcontent = $('#' + el).clone();
+    $('body').empty().html(printcontent);
+    window.print();
+    $('body').html(restorepage);
+}
+
+function PrintElem(elem) {
+    Popup($(elem).html());
+}
+
+function Popup(data) {
+    var mywindow = window.open('', 'new div', 'height=400,width=600');
+    mywindow.document.write('<html><head><title></title>');
+    mywindow.document.write('<link rel="stylesheet" href="public/assets/css/style.css" type="text/css" />');
+    mywindow.document.write('</head><body >');
+    mywindow.document.write(data);
+    mywindow.document.write('</body></html>');
+    mywindow.document.close();
+    mywindow.focus();
+    setTimeout(function(){mywindow.print();},1000);
+
+
+    return true;
+}
 
 
 

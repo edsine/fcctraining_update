@@ -311,6 +311,14 @@ class AdminController extends Controller
                    'class' => 'mb-3'
                )
            ))
+           ->add('Registration_fee', MoneyType::class, array(
+               'currency' => 'NGN',
+               'grouping' => true,
+               'attr' => array(
+                   'class' => 'form-control mb-3',
+                   'onkeypress' => 'return isNumber(event)'
+               )
+           ))
            ->add('Individual_Amount', MoneyType::class, array(
                'currency' => 'NGN',
                'grouping' => true,
@@ -411,6 +419,14 @@ class AdminController extends Controller
                     'class' => 'mb-3'
                 )
             ))
+            ->add('Registration_fee', MoneyType::class, array(
+                'currency' => 'NGN',
+                'grouping' => true,
+                'attr' => array(
+                    'class' => 'form-control mb-3',
+                    'onkeypress' => 'return isNumber(event)'
+                )
+            ))
             ->add('Individual_Amount', MoneyType::class, array(
                 'currency' => 'NGN',
                 'grouping' => true,
@@ -434,6 +450,14 @@ class AdminController extends Controller
                     'onkeypress' => 'return isNumber(event)'
                 )
             ))
+
+            ->add('Letter_content', TextareaType::class, array(
+                'attr' => array(
+                    'class' => 'trumbowyg-demo mb-3 form-control',
+                    'rows' => '15'
+                )
+            ))
+
             ->add('Update Training', SubmitType::class, array(
                 'attr' => array(
                     'class' => 'btn btn-success btn-block'

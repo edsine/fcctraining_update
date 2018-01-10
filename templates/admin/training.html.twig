@@ -18,6 +18,7 @@
                <th>Venue</th>
                <th>Date</th>
                <th>Time</th>
+                <th>Registration fee</th>
                <th>Individual amount</th>
                <th>Extra personel amount</th>
                <th>Individuals per MDA</th>
@@ -31,6 +32,7 @@
                     <td>{{ training.venue }}</td>
                     <td>{{ training.date|date("l, F j Y") }}</td>
                     <td>{{ training.time|date("H:i:s") }}</td>
+                    <td>&#8358;{{ training.registrationfee|number_format }}</td>
                     <td>&#8358;{{ training.individualamount|number_format }}</td>
                     <td>&#8358;{{ training.extrapersonnelamount|number_format }}</td>
                     <td>{{ training.individualspermda }}</td>
