@@ -163,11 +163,13 @@ class PagesController extends Controller
                 ->getRepository(Training::class)
                 ->find($training_id);
 
-            $date = date("F jS Y");
+
+
+            $date = date("jS F, Y");
 
 
 
-            $message = (new \Swift_Message('Hello Email'))
+         /*   $message = (new \Swift_Message('Hello Email'))
                 ->setFrom('info@nxtgendesign.com.ng')
                 ->setTo('cashmere10142@yahoo.com')
                 ->setBody(
@@ -182,12 +184,23 @@ class PagesController extends Controller
             ;
 
             $mailer->send($message);
+         */
 
+            $training_letter = $training->getLetterContent();
+
+            $training_letter_main = str_replace("[MDA-CODE]", $mda->getMdaCode(), $training_letter);
+
+            $training_letter = preg_replace('/\s+?(\S+)?$/', '', substr($training_letter_main, 0, 2267));
+            $training_letter2 = preg_replace('/\s+?(\S+)?$/', '', substr($training_letter_main, 2267, 10000000000));
+
+            //print_r($training_letter2);
 
             return $this->render('pages/letter.html.twig', array(
                 'mda' => $mda,
                 'trainings' => $training,
-                'date' => $date
+                'date' => $date,
+                'trainlet' => $training_letter,
+                'train_letter_continue' => $training_letter2
             ));
 
         }else{

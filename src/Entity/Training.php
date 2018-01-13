@@ -37,6 +37,11 @@ class Training
     private $time;
 
     /**
+     * @ORM\Column(type="string")
+     */
+    private $training_code;
+
+    /**
      * @ORM\Column(type="integer")
      */
     private $registration_fee;
@@ -219,6 +224,22 @@ class Training
     public function setLetterContent($letter_content): void
     {
         $this->letter_content = $letter_content;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTrainingCode()
+    {
+        return $this->training_code;
+    }
+
+    /**
+     * @param mixed $training_code
+     */
+    public function setTrainingCode($training_code)
+    {
+        $this->training_code = $training_code;
     }
 
 

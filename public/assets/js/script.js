@@ -9,18 +9,19 @@ function isNumber(evt) {
 
 $(document).ready(function() {
 
+    $('select').select2();
 
     $('textarea').summernote({
         tabsize: 2,
         height: 400
     });
 
+    $( ".datepicker" ).datepicker({ dateFormat: 'yy-mm-dd',  minDate: "0"  });
 
-    $('select').select2();
 
     $('.datatable').DataTable();
 
-$( ".datepicker" ).datepicker({ dateFormat: 'yy-mm-dd',  minDate: "0"  });
+
 
 timeago().render($('.time_ago'));
 
