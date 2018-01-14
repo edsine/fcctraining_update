@@ -342,6 +342,18 @@ class AdminController extends Controller
                    'onkeypress' => 'return isNumber(event)'
                )
            ))
+           ->add('Training_code', TextType::class, array(
+               'attr' => array(
+                   'class' => 'form-control mb-3',
+
+               )
+           ))
+           ->add('Letter_content', TextareaType::class, array(
+               'attr' => array(
+                   'class' => 'trumbowyg-demo mb-3 form-control',
+                   'rows' => '15'
+               )
+           ))
            ->add('Submit', SubmitType::class, array(
                'attr' => array(
                    'class' => 'btn btn-primary btn-block'
@@ -448,6 +460,12 @@ class AdminController extends Controller
                     'class' => 'form-control mb-3',
                     'maxlength' => '1',
                     'onkeypress' => 'return isNumber(event)'
+                )
+            ))
+            ->add('Training_code', TextType::class, array(
+                'attr' => array(
+                    'class' => 'form-control mb-3',
+
                 )
             ))
 

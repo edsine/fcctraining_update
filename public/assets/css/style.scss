@@ -83,10 +83,30 @@ header
 
 @media print {
 
-#letter
-{
-  padding: 70px !important;
-}
+  body {-webkit-print-color-adjust: exact !Important; }
+
+  #letter
+  {
+    -webkit-print-color-adjust:exact !Important;
+    padding: 70px !important;
+  }
+  #letter p img
+  {
+    -webkit-print-color-adjust:exact !Important;
+  }
+  img
+  {
+    -webkit-print-color-adjust:exact !Important;
+    width:100% !Important;
+    height:auto !Important;
+
+  }
+
+  span
+  {
+    display: block !Important;
+  }
+
 
   #letter p font, #letter p font b, #letter p b u, #letter p b
   {
@@ -95,11 +115,12 @@ header
     font-size: 16px !Important;
   }
 
-  #letter p
+  #letter p, #letter a, #letter b
   {
+    -webkit-print-color-adjust: exact !Important;
     font-size: 16px !Important;
     margin-bottom: 20px !Important;
-    text-align: justify !Important;
+
 
   }
 
