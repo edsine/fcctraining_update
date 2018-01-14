@@ -37,7 +37,7 @@
                     <td>&#8358;{{ training.extrapersonnelamount|number_format }}</td>
                     <td>{{ training.individualspermda }}</td>
                     <td>
-                        <a href="{{ path('admin_training_participants', {'id': training.id}) }}" class="btn btn-xs btn-primary"><i class="fa fa-search"></i> View participants</a>
+                        <a href="{{ path('admin_view_training', {'id': training.id}) }}" class="btn btn-xs btn-primary"><i class="fa fa-search"></i> View</a>
                         <a href="{{ path('admin_edit_training', {'id': training.id}) }}" class="btn btn-xs btn-warning mt-1"><i class="fa fa-pencil"></i> Edit</a>
                         <a href="{{ path('admin_delete_training', {'id': training.id}) }}" class="btn btn-xs btn-danger mt-1"><i class="fa fa-pencil"></i> Delete</a>
                     </td>

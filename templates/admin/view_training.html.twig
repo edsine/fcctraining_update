@@ -9,9 +9,26 @@
 
     <div class="clearfix"></div>
     <div class="card">
-        <div class="card-header bg-primary p-3 text-center font-white font-lg">
+        <div class="card-header bg-dark font-white p-3 font-lg">
             {{ training.title }}
         </div>
+    <div class="card-body ">
+        <ul class="nav nav-pills nav-fill" id="pills-tab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="details-tab" data-toggle="pill" href="#details-tab" role="tab" aria-controls="details-tab" aria-selected="true">Details</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="sessions-tab" data-toggle="pill" href="#sessions-tab" role="tab" aria-controls="sessions-tab" aria-selected="false">Sessions</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="financials-tab" data-toggle="pill" href="#financials-tab" role="tab" aria-controls="financials-tab" aria-selected="false">Financials</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="participants-tab" data-toggle="pill" href="#participants-tab" role="tab" aria-controls="participants-tab" aria-selected="false">Participants/MDAs</a>
+            </li>
+        </ul>
+    </div>
+
         <div class="card-body d-sm-flex text-center align-items-stretch">
             <div class="pr-2 mr-2 border_right col-xs-6">
                 <b>Venue</b>
@@ -97,6 +114,20 @@
 
 
 
+
+    <div class="row">
+
+        <div class="tab-content" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="details-tab" role="tabpanel" aria-labelledby="details-tab">
+                Details
+            </div>
+            <div class="tab-pane fade" id="sessions-tab" role="tabpanel" aria-labelledby="sessions-tab">
+                Sessions
+            </div>
+            <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">...</div>
+        </div>
+
+    </div>
 
 
     <div class="card">

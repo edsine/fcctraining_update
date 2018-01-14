@@ -188,15 +188,19 @@ class PagesController extends Controller
 
             $training_letter = $training->getLetterContent();
 
-            $training_letter = str_replace("[MDA-CODE]", $mda->getMdaCode(), $training_letter);
+            $training_letter_main = str_replace("[MDA-CODE]", $mda->getMdaCode(), $training_letter);
 
-            //print_r($training_letter);
+            $training_letter = preg_replace('/\s+?(\S+)?$/', '', substr($training_letter_main, 0, 2267));
+            $training_letter2 = preg_replace('/\s+?(\S+)?$/', '', substr($training_letter_main, 2267, 10000000000));
+
+            //print_r($training_letter2);
 
             return $this->render('pages/letter.html.twig', array(
                 'mda' => $mda,
                 'trainings' => $training,
                 'date' => $date,
-                'trainlet' => $training_letter
+                'trainlet' => $training_letter,
+                'train_letter_continue' => $training_letter2
             ));
 
         }else{

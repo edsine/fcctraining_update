@@ -44,31 +44,26 @@ header .navbar-nav .nav-item {
   margin-right: -50%; }
 
 @media print {
-  body {
-    -webkit-print-color-adjust: exact !Important; }
+  body * {
+    visibility: hidden; }
+
+  #letter, #letter * {
+    visibility: visible; }
 
   #letter {
-    -webkit-print-color-adjust: exact !Important;
-    padding: 70px !important; }
-
-  #letter p img {
-    -webkit-print-color-adjust: exact !Important; }
-
-  img {
-    -webkit-print-color-adjust: exact !Important;
-    width: 100% !Important;
-    height: auto !Important; }
-
-  span {
-    display: block !Important; }
+    position: absolute;
+    left: 0;
+    padding: 30px;
+    border: none;
+    top: 0; }
 
   #letter p font, #letter p font b, #letter p b u, #letter p b {
     font-family: "Times New Roman" !important;
-    font-size: 16px !Important; }
+    font-size: 14px !Important; }
 
   #letter p, #letter a, #letter b {
     -webkit-print-color-adjust: exact !Important;
-    font-size: 16px !Important;
+    font-size: 14px !Important;
     margin-bottom: 20px !Important; } }
 
 /*# sourceMappingURL=style.css.map */

@@ -1,0 +1,66 @@
+<div class="card">
+
+    <div class="card-body">
+
+
+        {% if training_sessions|length == 0 %}
+
+
+            <div class="text-center  font-weight-100 p-5 font-gray">
+
+                <img src="{{ asset('assets/images/close.png') }}">
+                <p class="font-lg mt-3">No training session found.</p>
+                <a href="{{ path('admin_add_training_session', {"id" : training.id }) }}" class="btn btn-success mt-3"><i class="fa fa-plus"></i> Add new session</a>
+
+            </div>
+
+            {% else %}
+
+
+
+                <table id="example" class="datatable table display table-bordered table-striped table-hover" cellspacing="0" width="100%">
+                    <thead >
+                    <tr>
+                        <th>Session name</th>
+                        <th>Start date</th>
+                        <th>End date</th>
+                        <th>Capacity</th>
+                        <th>Status</th>
+                        <th>Options</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for session in training_sessions %}
+                        <tr>
+                            <td>{{ session.name }}</td>
+                            <td>{{ session.startdate|date("l, F j Y") }}</td>
+                            <td>{{ session.enddate|date("l, F j Y") }}</td>
+                            <td>{{ session.capacity|number_format }}</td>
+                            <td>
+                                {% if session.status == '1' %}
+
+                                    Registration open
+
+                                {% else %}
+
+                                    Registration closed
+
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <a href="" class="btn btn-xs btn-primary"><i class="fa fa-users"></i> View participants</a>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+
+        {% endif %}
+
+
+    </div>
+
+</div>

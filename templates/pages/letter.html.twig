@@ -1,0 +1,50 @@
+{% extends 'access_base.html.twig' %}
+
+{% block content %}
+
+    {% include 'common/nav.html.twig' %}
+
+    <h2 class="page-header pt-4">MDA letter</h2>
+    <hr>
+
+
+    <button class="btn btn-primary" onclick="printContent('letter');"><i class="fa fa-print"></i> Print</button>
+
+    <div class="padding_50 font-lg" id="letter" style="font-family: 'Times New Roman' !Important">
+
+        <img src="{{ asset('assets/images/letterhead.png') }}" style="max-width: 100%" class="mb-5">
+
+        <p class="float-right font-weight-900" style="margin-top: -3px">{{ date }}</p>
+
+
+
+    <b>{{ trainings.trainingCode }}</b>
+
+        <div class="clearfix mb-4"></div>
+
+        <p>{{ mda.topOfficialDesignation }},<br>
+        {{ mda.name }}.<br>
+            {{ mda.address }}.
+        </p>
+
+
+
+        <div class="clearfix mb-5"></div>
+        <div>
+{% autoescape false %}
+        {{ trainlet }}
+{% endautoescape %}
+        </div>
+
+        <img src="{{ asset('assets/images/letter_footer.png') }}" style="max-width: 100%" class="mt-5">
+
+        {% autoescape false %}
+            {{ train_letter_continue }}
+        {% endautoescape %}
+
+
+    </div>
+
+
+
+{% endblock %}
