@@ -372,9 +372,13 @@ class AdminController extends Controller
            $em->persist($form_data);
            $em->flush();
 
+           $training_id = $training->getId();
+
            $this->addFlash('success', 'New Mda Added');
 
-           return $this->redirectToRoute('admin_training');
+           return $this->redirectToRoute('admin_view_training', array(
+               'id' => $training_id
+           ));
 
 
        }
@@ -533,13 +537,13 @@ class AdminController extends Controller
 
 
     /**
-     * @Route("/admin/training/{id}/participants", name="admin_training_participants")
+     * @Route("/admin/training/{id}", name="admin_view_training")
      *
      */
     public function training_participants($id)
     {
         $user = $this->getUser();
-        $page_title = "Training Participants";
+        $page_title = "Training";
 
         // get training information
         $training = $this->getDoctrine()
@@ -609,7 +613,7 @@ class AdminController extends Controller
 
 
         // render to view
-        return $this->render('admin/training_participants.html.twig', array(
+        return $this->render('admin/view_training.html.twig', array(
             'user' => $user,
             'page_title' => $page_title,
             'training_participants' => $t_participant,
