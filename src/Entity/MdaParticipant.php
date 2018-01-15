@@ -63,6 +63,8 @@ class MdaParticipant implements AdvancedUserInterface, \Serializable
     private $roles;
 
 
+    private $username;
+
 
 
 

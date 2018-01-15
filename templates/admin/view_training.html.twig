@@ -9,173 +9,49 @@
 
     <div class="clearfix"></div>
     <div class="card">
-        <div class="card-header bg-dark font-white p-3 font-lg">
+        <div class="card-header bg-dark font-white p-3 font-sm-4">
             {{ training.title }}
         </div>
     <div class="card-body ">
         <ul class="nav nav-pills nav-fill" id="pills-tab" role="tablist">
             <li class="nav-item">
-                <a class="nav-link active" id="details-tab" data-toggle="pill" href="#details-tab" role="tab" aria-controls="details-tab" aria-selected="true">Details</a>
+                <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true">Details</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="sessions-tab" data-toggle="pill" href="#sessions-tab" role="tab" aria-controls="sessions-tab" aria-selected="false">Sessions</a>
+                <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false">Sessions</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="financials-tab" data-toggle="pill" href="#financials-tab" role="tab" aria-controls="financials-tab" aria-selected="false">Financials</a>
+                <a class="nav-link" id="pills-contact-tab" data-toggle="pill" href="#pills-contact" role="tab" aria-controls="pills-contact" aria-selected="false">Financials</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="participants-tab" data-toggle="pill" href="#participants-tab" role="tab" aria-controls="participants-tab" aria-selected="false">Participants/MDAs</a>
+                <a class="nav-link" id="pills-participants-tab" data-toggle="pill" href="#pills-participants" role="tab" aria-controls="pills-participants" aria-selected="false">Participants/MDAs</a>
             </li>
         </ul>
     </div>
 
-        <div class="card-body d-sm-flex text-center align-items-stretch">
-            <div class="pr-2 mr-2 border_right col-xs-6">
-                <b>Venue</b>
-                <p>{{ training.venue }}</p>
-            </div>
-            <div class="pr-2 mr-2 border_right">
-                <b>Date</b>
-                <p>{{ training.date|date("l, F j Y") }}</p>
-            </div>
-            <div class="pr-2 mr-2 border_right">
-                <b>Time</b>
-                <p>{{ training.time|date("H:i:s") }}</p>
-            </div>
-            <div class="pr-2 mr-2 border_right">
-                <b>Individual Amt.</b>
-                <p>&#8358;{{ training.individualamount|number_format }}</p>
-            </div>
-            <div class="pr-2 mr-2 border_right">
-                <b>Extra personnel Amt.</b>
-                <p>&#8358;{{ training.extrapersonnelamount|number_format }}</p>
-            </div>
-            <div class="">
-                <b>Individuals per MDA</b>
-                <p>{{ training.individualspermda|number_format }}</p>
-            </div>
-        </div>
-    </div>
-
-
-
-
-    <div class="row">
-
-        <div class="col-lg-3 col-md-6 col-6">
-            <div class="card">
-            <div class="card-header bg-dark font-white">
-                <h4>Participants</h4>
-
-            </div>
-            <div class="card-body text-center">
-                <h2 class="font-lg m-0">{{ count_participant }}</h2>
-            </div>
-            </div>
-        </div>
-
-        <div class="col-lg-3 col-md-6 col-6">
-            <div class="card">
-                <div class="card-header bg-dark font-white">
-                    <h4>Card Payments</h4>
-
-                </div>
-                <div class="card-body text-center">
-                    <h2 class="font-lg m-0">&#8358;{{ total_card|number_format }}</h2>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-3 col-md-6 col-6">
-            <div class="card">
-                <div class="card-header bg-dark font-white">
-                    <h4>Cash Payments</h4>
-
-                </div>
-                <div class="card-body text-center">
-                    <h2 class="font-lg m-0">&#8358;{{ total_cash|number_format }}</h2>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-3 col-md-6 col-6">
-            <div class="card">
-                <div class="card-header bg-dark font-white">
-                    <h4>Undertaken</h4>
-
-                </div>
-                <div class="card-body text-center">
-                    <h2 class="font-lg m-0">{{ total_undertaken }}</h2>
-                </div>
-            </div>
-        </div>
 
     </div>
 
 
 
+    <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
 
-    <div class="row">
-
-        <div class="tab-content" id="pills-tabContent">
-            <div class="tab-pane fade show active" id="details-tab" role="tabpanel" aria-labelledby="details-tab">
-                Details
-            </div>
-            <div class="tab-pane fade" id="sessions-tab" role="tabpanel" aria-labelledby="sessions-tab">
-                Sessions
-            </div>
-            <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">...</div>
+    </ul>
+    <div class="tab-content" id="pills-tabContent">
+        <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+            {% include 'common/admin/training_details.html.twig' %}
         </div>
-
-    </div>
-
-
-    <div class="card">
-        <div class="card-header  align-items-center">
-            <h4>All Participants</h4>
-
+        <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+            {% include 'common/admin/training_session.html.twig' %}
         </div>
-        <div class="card-body">
-
-            <table id="example" class="datatable table display table-bordered table-striped table-hover" cellspacing="0" width="100%">
-                <thead >
-                <tr>
-                    <th>Participant</th>
-                    <th>MDA code</th>
-                    <th>Amount paid</th>
-                    <th>Payment method</th>
-                    <th>Payment status</th>
-                    <th>Payment date</th>
-                    <th>Options</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for participant in training_participants %}
-                    <tr>
-                        <td>{{ participant.participant }}</td>
-                        <td>{{ participant.mda }}</td>
-                        <td>&#8358;{{ participant.amountpaid|number_format }}</td>
-                        <td>{{ participant.paymentmethod }}</td>
-                        <td>
-                            {% if participant.paymentstatus == 1 %}
-                                <div class="badge badge-success font-xs">Paid</div>
-
-                                {% else %}
-
-                                    <div class="badge badge-danger font-xs">Not Paid</div>
-
-                            {% endif %}
-                        </td>
-                        <td>{{ participant.paymentdate|date("l, F j Y H:i:s") }}</td>
-                        <td></td>
-                    </tr>
-
-                {% endfor %}
-                </tbody>
-            </table>
-
+        <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">...</div>
+        <div class="tab-pane fade" id="pills-participants" role="tabpanel" aria-labelledby="pills-contact-tab">
+            {% include 'common/admin/training_participant.html.twig' %}
         </div>
     </div>
+
+
+
 
 
 

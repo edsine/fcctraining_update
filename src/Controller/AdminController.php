@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Training;
 use App\Entity\TrainingParticipant;
+use App\Entity\TrainingSession;
 use App\Entity\User;
 use App\Entity\Mda;
 use App\Entity\MdaParticipant;
@@ -556,6 +557,14 @@ class AdminController extends Controller
             ->getRepository(TrainingParticipant::class)
             ->findAll();
 
+
+        // get training session information
+        $training_session = $this->getDoctrine()
+            ->getRepository(Trainingsession::class)
+            ->findBy([
+                'training_id' => $id
+            ]);
+
         $em = $this->getDoctrine()->getManager();
 
 
@@ -621,10 +630,163 @@ class AdminController extends Controller
             'count_participant' => count($t_participant),
             'total_card' => $card_amount[0]['total_card_amount'],
             'total_cash' => $cash_amount[0]['total_cash_amount'],
-            'total_undertaken' => count($undertaken_count)
+            'total_undertaken' => count($undertaken_count),
+            'training_sessions' => $training_session,
         ));
 
     }
+
+
+    /**
+     * @Route("/admin/training/{id}/session/add", name="admin_add_training_session")
+     */
+
+    public function add_session(Request $request, $id)
+    {
+
+        $user = $this->getUser();
+        $page_title = "Training";
+
+        $training = $this->getDoctrine()
+            ->getRepository(Training::class)
+            ->find($id);
+
+        $training_session = new TrainingSession();
+
+        $form = $this->createFormBuilder($training_session)
+            ->add("Name", TextType::class, array(
+                'attr' => array(
+                    'class' => 'form-control mb-3'
+                )
+            ))
+            ->add("StartDate", DateType::class, array(
+                'widget' => 'single_text',
+                'html5' => false,
+                'attr' => array(
+                    'class' => 'form-control mb-3 datepicker',
+                    'readonly' => ''
+                )
+            ))
+            ->add("EndDate", DateType::class, array(
+                'widget' => 'single_text',
+                'html5' => false,
+                'attr' => array(
+                    'class' => 'form-control mb-3 datepicker',
+                    'readonly' => ''
+                )
+            ))
+            ->add("Capacity", NumberType::class, array(
+                'attr' => array(
+                    'class' => 'form-control mb-3',
+                    'onkeypress' => 'return isNumber(event)'
+                )
+            ))
+            ->add("Submit", SubmitType::class, array(
+                'attr' => array(
+                    'class' => 'btn btn-primary'
+                )
+            ))
+
+            ->getForm();
+
+
+        $form->handleRequest($request);
+
+
+        if($form->isSubmitted() && $form->isValid())
+        {
+
+            $training_session = $form->getData();
+
+
+            $training_session->setTrainingId($id);
+
+            $training_session->setStatus('0');
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($training_session);
+            $em->flush();
+
+            $this->addFlash('success', 'Training session added');
+
+            return $this->redirectToRoute('admin_view_training', array(
+                'id' => $id
+            ));
+
+
+        }
+
+        return $this->render('admin/add_training_session.html.twig', array(
+            'user' => $user,
+            'page_title' => $page_title,
+            'training' => $training,
+            'form' => $form->createView()
+
+        ));
+
+    }
+
+
+
+    /**
+     * @Route("/admin/training/session/{id}/close", name="admin_close_training_session")
+     */
+
+    public function close_session($id)
+    {
+
+        $training_session = $this->getDoctrine()
+            ->getRepository(TrainingSession::class)
+            ->find($id);
+
+        $training_session->setStatus('0');
+
+        $training_id = $training_session->getTrainingId();
+
+        $em = $this->getDoctrine()->getManager();
+
+        $em->persist($training_session);
+
+        $em->flush();
+
+        $this->addFlash('success', 'Training session closed');
+
+        return $this->redirectToRoute('admin_view_training', array(
+            'id' => $training_id
+        ));
+
+    }
+
+    /**
+     * @Route("/admin/training/session/{id}/open", name="admin_open_training_session")
+     */
+
+    public function open_session($id)
+    {
+
+        $training_session = $this->getDoctrine()
+            ->getRepository(TrainingSession::class)
+            ->find($id);
+
+        $training_session->setStatus('1');
+
+        $training_id = $training_session->getTrainingId();
+
+        $em = $this->getDoctrine()->getManager();
+
+        $em->persist($training_session);
+
+        $em->flush();
+
+        $this->addFlash('success', 'Training session opened');
+
+        return $this->redirectToRoute('admin_view_training', array(
+            'id' => $training_id
+        ));
+
+    }
+
+
 
         /**
      * @Route("/admin/financial", name="admin_financials")

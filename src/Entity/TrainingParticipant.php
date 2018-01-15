@@ -25,6 +25,11 @@ class TrainingParticipant
     /**
      * @ORM\Column(type="integer")
      */
+    private $session_id;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
     private $participant_id;
 
     /**
@@ -83,6 +88,24 @@ class TrainingParticipant
     {
         $this->training_id = $training_id;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getSessionId()
+    {
+        return $this->session_id;
+    }
+
+    /**
+     * @param mixed $session_id
+     */
+    public function setSessionId($session_id)
+    {
+        $this->session_id = $session_id;
+    }
+
+
 
     /**
      * @return mixed
