@@ -38,10 +38,6 @@ function printContent(el){
     $('body').html(restorepage);
 }
 
-function PrintElem(elem) {
-    Popup($(elem).html());
-}
-
 
 
  toastr.options = {

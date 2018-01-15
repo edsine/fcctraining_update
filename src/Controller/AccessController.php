@@ -25,12 +25,11 @@ class AccessController extends Controller
     public function index(AuthenticationUtils $authUtils)
     {
 
-        // get the login error if there is one
-        $error = $authUtils->getLastAuthenticationError();
+            // get the login error if there is one
+            $error = $authUtils->getLastAuthenticationError();
 
-        // last username entered by the user
-        $lastUsername = $authUtils->getLastUsername();
-
+            // last username entered by the user
+            $lastUsername = $authUtils->getLastUsername();
 
         return $this->render('access/login.html.twig', array(
             'last_username' => $lastUsername,
@@ -147,6 +146,11 @@ class AccessController extends Controller
                 )
             ))
             ->add('email', EmailType::class, array(
+                'attr' => array(
+                    'class' => 'form-control form-control-lg mb-3',
+                )
+            ))
+            ->add('username', TextType::class, array(
                 'attr' => array(
                     'class' => 'form-control form-control-lg mb-3',
                 )

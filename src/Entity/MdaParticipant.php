@@ -62,12 +62,10 @@ class MdaParticipant implements AdvancedUserInterface, \Serializable
      */
     private $roles;
 
-
+    /**
+     * @ORM\Column(type="string")
+     */
     private $username;
-
-
-
-
 
 
     /**
@@ -139,8 +137,7 @@ class MdaParticipant implements AdvancedUserInterface, \Serializable
      */
     public function getUsername()
     {
-        $name = $this->first_name." ".$this->last_name;
-        return $name;
+        return $this->username;
     }
 
     /**
@@ -311,8 +308,7 @@ class MdaParticipant implements AdvancedUserInterface, \Serializable
             $this->username,
             $this->password,
             $this->isActive
-            // see section on salt below
-            // $this->salt,
+
         ));
     }
 
