@@ -215,7 +215,7 @@ class AccessController extends Controller
         }
         else if($this->get('security.authorization_checker')->isGranted('ROLE_USER'))
         {
-            return $this->redirectToRoute('user');
+            return $this->redirectToRoute('user_dashboard');
         }
         else
         {

@@ -36,15 +36,6 @@ class AdminController extends Controller
 {
 
     /**
-     * AdminController constructor.
-     * @Security("has_role('ROLE_ADMIN')")
-     */
-    public function __construct()
-    {
-
-    }
-
-    /**
      * @Route("/admin", name="admin_dashboard")
      * @return Response
      */
