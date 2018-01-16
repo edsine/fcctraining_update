@@ -1,0 +1,113 @@
+{% extends'user_base.html.twig' %}
+
+{% block body %}
+
+    {% for invoice in invoices22 %}
+
+        dj sjvsn sdj sjd
+
+    {% else %}
+
+        nothing there
+
+    {% endfor %}
+
+    <div class="card">
+
+        <div class="card-body bg-dark font-white">
+            <h2 class="mb-0">{{ training.title }}</h2>
+        </div>
+
+    </div>
+
+    <div class="row">
+
+
+
+         <div class="col-md-8">
+
+             <div class="card">
+                 <div class="card-header">
+                     Registered participants
+                 </div>
+                 <div class="card-body">
+
+                     <table id="example" class="datatable table display table-bordered table-striped table-hover" cellspacing="0" width="100%">
+                         <thead >
+                         <tr>
+                             <th>Name</th>
+                             <th>Session</th>
+                             <th>Attended</th>
+                             <th>Payment status</th>
+                             <th>Options</th>
+                         </tr>
+                         </thead>
+                         <tbody>
+                         {% for participant in training_participants %}
+                             <tr>
+                                 <td>{{ participant.name }}</td>
+                                 <td>{{ participant.session }}</td>
+                                 <td>
+                                  {% if participant.attended == 0 %}
+
+                                      No
+                                  {% else %}
+
+                                      Yes
+
+                                  {% endif %}
+                                 </td>
+                                 <td>
+                                     {% if participant.payment_status == 0 %}
+
+                                         <span class="text-danger">Not paid</span>
+
+                                     {% else %}
+
+                                         <span class="text-success">Paid</span>
+
+                                     {% endif %}
+                                 </td>
+                                 <td>
+
+                                     {% if participant.payment_status == 0 %}
+
+                                       <a href="" class="btn btn-primary btn-xs"><i class="fa fa-file-o"></i> View invoice</a>
+
+                                     {% endif %}
+                                 </td>
+                             </tr>
+
+                         {% endfor %}
+                         </tbody>
+                     </table>
+
+                 </div>
+             </div>
+
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="card">
+                <div class="card-header">
+                    Invoice(s)
+                </div>
+                <div class="card-body">
+
+
+
+
+
+                </div>
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+{% endblock %}

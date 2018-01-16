@@ -28,6 +28,10 @@ timeago().render($('.time_ago'));
 
 });
 
+$("#add_participant").click(function () {
+    $("#training_form_participants").append("<div class='form-group'><label>Participant name</label> <input type='text' name='participants[]' class='form-control'></div>");
+});
+
 
 
 function printContent(el){

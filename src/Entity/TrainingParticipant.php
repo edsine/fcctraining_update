@@ -28,9 +28,9 @@ class TrainingParticipant
     private $session_id;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="string")
      */
-    private $participant_id;
+    private $participant_name;
 
     /**
      * @ORM\Column(type="integer")
@@ -40,22 +40,12 @@ class TrainingParticipant
     /**
      * @ORM\Column(type="integer")
      */
-    private $amount_paid;
+    private $invoice_id;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="boolean")
      */
-    private $payment_method;
-
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $payment_status;
-
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    private $payment_date;
+    private $attended;
 
     /**
      * @return mixed
@@ -68,7 +58,7 @@ class TrainingParticipant
     /**
      * @param mixed $id
      */
-    public function setId($id): void
+    public function setId($id)
     {
         $this->id = $id;
     }
@@ -84,7 +74,7 @@ class TrainingParticipant
     /**
      * @param mixed $training_id
      */
-    public function setTrainingId($training_id): void
+    public function setTrainingId($training_id)
     {
         $this->training_id = $training_id;
     }
@@ -105,23 +95,38 @@ class TrainingParticipant
         $this->session_id = $session_id;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getParticipantName()
+    {
+        return $this->participant_name;
+    }
 
+    /**
+     * @param mixed $participant_name
+     */
+    public function setParticipantName($participant_name)
+    {
+        $this->participant_name = $participant_name;
+    }
 
     /**
      * @return mixed
      */
-    public function getParticipantId()
+    public function getInvoiceId()
     {
-        return $this->participant_id;
+        return $this->invoice_id;
     }
 
     /**
-     * @param mixed $participant_id
+     * @param mixed $invoice_id
      */
-    public function setParticipantId($participant_id): void
+    public function setInvoiceId($invoice_id)
     {
-        $this->participant_id = $participant_id;
+        $this->invoice_id = $invoice_id;
     }
+
 
     /**
      * @return mixed
@@ -134,75 +139,27 @@ class TrainingParticipant
     /**
      * @param mixed $mda_code
      */
-    public function setMdaCode($mda_code): void
+    public function setMdaCode($mda_code)
     {
         $this->mda_code = $mda_code;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getAmountPaid()
-    {
-        return $this->amount_paid;
-    }
-
-    /**
-     * @param mixed $amount_paid
-     */
-    public function setAmountPaid($amount_paid): void
-    {
-        $this->amount_paid = $amount_paid;
-    }
 
     /**
      * @return mixed
      */
-    public function getPaymentMethod()
+    public function getAttended()
     {
-        return $this->payment_method;
+        return $this->attended;
     }
 
     /**
-     * @param mixed $payment_method
+     * @param mixed $attended
      */
-    public function setPaymentMethod($payment_method): void
+    public function setAttended($attended)
     {
-        $this->payment_method = $payment_method;
+        $this->attended = $attended;
     }
-
-    /**
-     * @return mixed
-     */
-    public function getPaymentStatus()
-    {
-        return $this->payment_status;
-    }
-
-    /**
-     * @param mixed $payment_status
-     */
-    public function setPaymentStatus($payment_status): void
-    {
-        $this->payment_status = $payment_status;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getPaymentDate()
-    {
-        return $this->payment_date;
-    }
-
-    /**
-     * @param mixed $payment_date
-     */
-    public function setPaymentDate($payment_date): void
-    {
-        $this->payment_date = $payment_date;
-    }
-
 
 
 }

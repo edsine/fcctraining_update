@@ -559,31 +559,6 @@ class AdminController extends Controller
         $em = $this->getDoctrine()->getManager();
 
 
-        // select and sum all card payments
-        $query = "SELECT SUM(amount_paid) AS total_card_amount FROM training_participant WHERE payment_method='card' AND training_id='$id'";
-
-        $statement = $em->getConnection()->prepare($query);
-        $statement->execute();
-        $card_amount = $statement->fetchAll();
-
-
-        // select and sum all cash payments
-        $query2 = "SELECT SUM(amount_paid) AS total_cash_amount FROM training_participant WHERE payment_method='cash' AND training_id='$id'";
-
-        $statement2 = $em->getConnection()->prepare($query2);
-        $statement2->execute();
-        $cash_amount = $statement2->fetchAll();
-
-
-        // select and sum all undertaken
-        $undertaken_count = $this->getDoctrine()
-            ->getRepository(TrainingParticipant::class)
-            ->findBy([
-               'payment_method' => 'undertaken',
-                'training_id' => $id
-            ]);
-
-
         // start new training participant array
         $t_participant = array();
 
@@ -592,20 +567,17 @@ class AdminController extends Controller
 
             $part = $this->getDoctrine()
                 ->getRepository(MdaParticipant::class)
-                ->find($tp->getParticipantId());
+                ->find($tp->getId());
+
 
             $mda = $this->getDoctrine()
                 ->getRepository(Mda::class)
                 ->findOneBy(['mda_code' => $tp->getMdaCode()]);
 
-            $m['participantid'] = $tp->getParticipantId();
-            $m['participant'] = $part->getUsername();
+            $m['participantid'] = $tp->getId();
+            $m['participant'] = $tp->getParticipantName();
             $m['mdacode'] = $tp->getMdaCode();
             $m['mda'] = $mda->getName();
-            $m['amountpaid'] = $tp->getAmountPaid();
-            $m['paymentmethod'] = $tp->getPaymentMethod();
-            $m['paymentstatus'] = $tp->getPaymentStatus();
-            $m['paymentdate'] = $tp->getPaymentDATE();
 
 
             array_push($t_participant, $m);
@@ -619,9 +591,6 @@ class AdminController extends Controller
             'training_participants' => $t_participant,
             'training' => $training,
             'count_participant' => count($t_participant),
-            'total_card' => $card_amount[0]['total_card_amount'],
-            'total_cash' => $cash_amount[0]['total_cash_amount'],
-            'total_undertaken' => count($undertaken_count),
             'training_sessions' => $training_session,
         ));
 

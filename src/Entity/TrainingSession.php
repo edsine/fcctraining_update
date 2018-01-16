@@ -43,7 +43,7 @@ class TrainingSession
     private $capacity;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="integer")
      */
     private $status;
 

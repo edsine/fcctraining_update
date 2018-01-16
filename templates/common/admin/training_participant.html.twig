@@ -12,41 +12,6 @@
         </div>
     </div>
 
-    <div class="col-lg-3 col-md-6 col-6">
-        <div class="card">
-            <div class="card-header bg-dark font-white">
-                <h4>Card Payments</h4>
-
-            </div>
-            <div class="card-body text-center">
-                <h2 class="font-lg m-0">&#8358;{{ total_card|number_format }}</h2>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6 col-6">
-        <div class="card">
-            <div class="card-header bg-dark font-white">
-                <h4>Cash Payments</h4>
-
-            </div>
-            <div class="card-body text-center">
-                <h2 class="font-lg m-0">&#8358;{{ total_cash|number_format }}</h2>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6 col-6">
-        <div class="card">
-            <div class="card-header bg-dark font-white">
-                <h4>Undertaken</h4>
-
-            </div>
-            <div class="card-body text-center">
-                <h2 class="font-lg m-0">{{ total_undertaken }}</h2>
-            </div>
-        </div>
-    </div>
 
 </div>
 
@@ -75,19 +40,6 @@
                 <tr>
                     <td>{{ participant.participant }}</td>
                     <td>{{ participant.mda }}</td>
-                    <td>&#8358;{{ participant.amountpaid|number_format }}</td>
-                    <td>{{ participant.paymentmethod }}</td>
-                    <td>
-                        {% if participant.paymentstatus == 1 %}
-                            <div class="badge badge-success font-xs">Paid</div>
-
-                        {% else %}
-
-                            <div class="badge badge-danger font-xs">Not Paid</div>
-
-                        {% endif %}
-                    </td>
-                    <td>{{ participant.paymentdate|date("l, F j Y H:i:s") }}</td>
                     <td></td>
                 </tr>
 
