@@ -33,6 +33,16 @@ class TrainingParticipant
     private $participant_name;
 
     /**
+     * @ORM\Column(type="string")
+     */
+    private $participant_email;
+
+    /**
+     * @ORM\Column(type="string")
+     */
+    private $participant_phone;
+
+    /**
      * @ORM\Column(type="integer")
      */
     private $mda_code;
@@ -159,6 +169,38 @@ class TrainingParticipant
     public function setAttended($attended)
     {
         $this->attended = $attended;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getParticipantEmail()
+    {
+        return $this->participant_email;
+    }
+
+    /**
+     * @param mixed $participant_email
+     */
+    public function setParticipantEmail($participant_email)
+    {
+        $this->participant_email = $participant_email;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getParticipantPhone()
+    {
+        return $this->participant_phone;
+    }
+
+    /**
+     * @param mixed $participant_phone
+     */
+    public function setParticipantPhone($participant_phone)
+    {
+        $this->participant_phone = $participant_phone;
     }
 
 

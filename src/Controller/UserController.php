@@ -150,10 +150,13 @@ SELECT training_participant.training_id FROM training_participant WHERE training
 
         $form_session = $request->request->get('training_session');
         $form_participants = $request->request->get('participants');
+        $form_participants_email = $request->request->get('participants_email');
+        $form_participants_phone = $request->request->get('participants_phone');
 
         if(!empty($form_session))
         {
             $em = $this->getDoctrine()->getManager();
+
 
             //generate invoice for the MDA
             $invoice = new Invoice();
@@ -163,8 +166,23 @@ SELECT training_participant.training_id FROM training_participant WHERE training
             $invoice->setTrainingId($training->getId());
 
 
+            $mda_code = $user->getMdaCode();
+            $query4 = $em->getConnection()->prepare("SELECT * FROM invoice WHERE training_id='$id' AND mda_code='$mda_code' AND initial_invoice='1'");
+            $query4->execute();
+            $initial_invoice = count($query4->fetchAll());
+
+
+            if($initial_invoice >= '1')
+            {
+                $invoice->setInitialInvoice("0");
+            }else{
+                $invoice->setInitialInvoice("1");
+            }
+
             // calculate invoice charge based on number of participants
             $all_participants = count($form_participants);
+
+
 
             if($all_participants > $training->getIndividualsPerMda())
             {
@@ -175,37 +193,51 @@ SELECT training_participant.training_id FROM training_participant WHERE training
                 $extra_partcipants = 0;
             }
 
-            $main_partcipants_charge = $main_partcipants * $training->getIndividualAmount();
 
-            $extra_partcipants_charge = $extra_partcipants * $training->getExtraPersonnelAmount();
+            if($initial_invoice === 0 ) {
 
-            $total_charge = $training->getRegistrationFee() + $main_partcipants_charge + $extra_partcipants_charge;
+                $main_partcipants_charge = $main_partcipants * $training->getIndividualAmount();
 
-            $invoice->setPaymentAmount($total_charge);
+                $extra_partcipants_charge = $extra_partcipants * $training->getExtraPersonnelAmount();
+
+                $total_charge = $training->getRegistrationFee() + $main_partcipants_charge + $extra_partcipants_charge;
+
+                $invoice->setPaymentAmount($total_charge);
+
+            }elseif($initial_invoice >= 1){
+
+                $total_charge = $all_participants * $training->getExtraPersonnelAmount();
+
+
+                $invoice->setPaymentAmount($total_charge);
+
+            }
 
             $em->persist($invoice);
             $em->flush();
 
 
-            foreach($form_participants as $part) {
+            for($i=0; $i < $all_participants; $i++)
+            {
+                if(!empty($form_participants[$i])) {
+                // save training participants
+                $session = new TrainingParticipant();
 
-                if(!empty($part)) {
-
-                    // save training participants
-                    $session = new TrainingParticipant();
-
-                    $session->setTrainingId($training->getId());
-                    $session->setMdaCode($user->getMdaCode());
-                    $session->setParticipantName($part);
-                    $session->setSessionId($form_session);
-                    $session->setAttended("0");
-                    $session->setInvoiceId($invoice->getId());
+                $session->setTrainingId($training->getId());
+                $session->setMdaCode($user->getMdaCode());
+                $session->setParticipantName($form_participants[$i]);
+                $session->setParticipantPhone($form_participants_phone[$i]);
+                $session->setParticipantEmail($form_participants_email[$i]);
+                $session->setSessionId($form_session);
+                $session->setAttended("0");
+                $session->setInvoiceId($invoice->getId());
 
 
-                    $em->persist($session);
-                    $em->flush();
+                $em->persist($session);
+                $em->flush();
 
                 }
+
             }
 
 
@@ -299,6 +331,8 @@ SELECT training_participant.training_id FROM training_participant WHERE training
                 ->find($participant->getInvoiceId());
 
             $row['name'] = $participant->getParticipantName();
+            $row['email'] = $participant->getParticipantEmail();
+            $row['phone'] = $participant->getParticipantPhone();
             $row['session'] = $training_session->getName();
             $row['attended'] = $participant->getAttended();
             $row['payment_status'] = $iv->getPaymentStatus();
@@ -352,6 +386,7 @@ SELECT training_participant.training_id FROM training_participant WHERE training
         $user = $this->getUser();
         $page_title = "Invoice";
 
+        $em = $this->getDoctrine()->getManager();
 
         $invoice = $this->getDoctrine()
             ->getRepository(Invoice::class)
@@ -369,9 +404,31 @@ SELECT training_participant.training_id FROM training_participant WHERE training
                 'id' => $invoice->getTrainingId()
             ]);
 
-
+        $training_id = $training->getId();
         $invoice_id = $invoice->getId();
-        $em = $this->getDoctrine()->getManager();
+
+        $mda_code = $mda->getMdaCode();
+        $query4 = $em->getConnection()->prepare("SELECT * FROM training_participant WHERE training_id='$training_id' AND mda_code='$mda_code' AND invoice_id='$invoice_id'");
+        $query4->execute();
+        $all_participants = count($query4->fetchAll());
+
+
+
+        if($all_participants >= $training->getIndividualsPerMda())
+        {
+            $d_participants = $training->getIndividualsPerMda();
+
+            $d_extra_participants = $all_participants - $d_participants;
+
+        }elseif($all_participants < $training->getIndividualsPerMda())
+        {
+
+            $d_participants = $all_participants;
+            $d_extra_participants = 0;
+        }
+
+
+
 
         $query = $em->getConnection()->prepare("SELECT id FROM training_participant WHERE invoice_id='$invoice_id'");
         $query->execute();
@@ -383,6 +440,8 @@ SELECT training_participant.training_id FROM training_participant WHERE training
             'user' => $user,
             'page_title' => $page_title,
             'invoice' => $invoice,
+            'all_main_participants' => $d_participants,
+            'all_extra_participants' => $d_extra_participants,
             'mda' => $mda,
             'training' => $training,
             'payment_id' => $this->randomString(9),

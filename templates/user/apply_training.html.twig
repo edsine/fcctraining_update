@@ -33,21 +33,28 @@
 
                 <hr>
 
-                <a href="#" class="float-right btn btn-xs btn-success" id="add_participant"><i class="fa fa-plus"></i> Add participant</a>
+                <a style="cursor: pointer" class="float-right font-white btn btn-xs btn-success" id="add_participant"><i class="fa fa-plus"></i> Add another participant</a>
 
                 <h4 class="mb-4">Add participants</h4>
 
                 <div id="training_form_participants">
 
+                    <div class="bg-gray p-3 mb-3">
                 <div class="form-group">
                     <label>Participant name</label>
-                    <input type="text" class="form-control" name="participants[]" value="{{ user.firstname }} {{ user.lastname }}">
+                    <input type="text" class="form-control" required="required" name="participants[]" value="{{ user.firstname }} {{ user.lastname }}">
                 </div>
 
+                    <div class="form-group">
+                        <label>Participant email</label>
+                        <input type="email" class="form-control" required="required" name="participants_email[]">
+                    </div>
+
                 <div class="form-group">
-                    <label>Participant name</label>
-                    <input type="text" class="form-control" name="participants[]">
+                    <label>Participant phone</label>
+                    <input type="text" class="form-control" onkeypress="return isNumber(event)" name="participants_phone[]">
                 </div>
+                    </div>
 
                 </div>
 

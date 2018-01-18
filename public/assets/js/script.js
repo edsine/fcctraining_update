@@ -29,7 +29,7 @@ timeago().render($('.time_ago'));
 });
 
 $("#add_participant").click(function () {
-    $("#training_form_participants").append("<div class='form-group'><label>Participant name</label> <input type='text' name='participants[]' class='form-control'></div>");
+    $("#training_form_participants").append("<div class='bg-gray p-3 mb-3'> <div class='form-group'> <label>Participant name</label> <input type='text' class='form-control' required='required' name='participants[]'> </div> <div class='form-group'> <label>Participant email</label> <input type='email' class='form-control' required='required' name='participants_email[]'> </div> <div class='form-group'> <label>Participant phone</label> <input type='text' class='form-control' onkeypress='return isNumber(event)' name='participants_phone[]'></div></div>");
 });
 
 

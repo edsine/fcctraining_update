@@ -44,6 +44,11 @@ class Invoice
     /**
      * @ORM\Column(type="boolean")
      */
+    private $initial_invoice;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
     private $payment_status;
 
     /**
@@ -156,6 +161,22 @@ class Invoice
     public function setPaymentId($payment_id)
     {
         $this->payment_id = $payment_id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getInitialInvoice()
+    {
+        return $this->initial_invoice;
+    }
+
+    /**
+     * @param mixed $initial_invoice
+     */
+    public function setInitialInvoice($initial_invoice)
+    {
+        $this->initial_invoice = $initial_invoice;
     }
 
 
