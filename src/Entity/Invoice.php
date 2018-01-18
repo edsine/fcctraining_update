@@ -52,6 +52,11 @@ class Invoice
     private $payment_status;
 
     /**
+     * @ORM\Column(type="text")
+     */
+    private $payment_evidence;
+
+    /**
      * @return mixed
      */
     public function getId()
@@ -177,6 +182,22 @@ class Invoice
     public function setInitialInvoice($initial_invoice)
     {
         $this->initial_invoice = $initial_invoice;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPaymentEvidence()
+    {
+        return $this->payment_evidence;
+    }
+
+    /**
+     * @param mixed $payment_evidence
+     */
+    public function setPaymentEvidence($payment_evidence)
+    {
+        $this->payment_evidence = $payment_evidence;
     }
 
 

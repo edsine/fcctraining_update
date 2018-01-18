@@ -4,11 +4,13 @@ namespace App\Controller;
 
 use App\Entity\Invoice;
 use App\Entity\Mda;
+use App\Entity\MdaParticipant;
 use App\Entity\Training;
 use App\Entity\TrainingParticipant;
 use App\Entity\TrainingSession;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -17,6 +19,7 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -509,16 +512,129 @@ SELECT training_participant.training_id FROM training_participant WHERE training
     /**
      * @Route("/user/account", name="user_account")
      */
-    public function user_manage_account()
+    public function user_manage_account(Request $request)
     {
         $user = $this->getUser();
         $page_title = "Account";
 
+
+
+        $new_user = new MdaParticipant();
+
+        $new_user->setId($user->getId());
+
+        $form = $this->createFormBuilder($user)
+            ->add('First_name', TextType::class, array(
+                'attr' => array(
+                    'class' => 'form-control mb-3 custom-input',
+                )
+            ))
+            ->add('Last_name', TextType::class, array(
+                'attr' => array(
+                    'class' => 'form-control mb-3 custom-input',
+                )
+            ))
+            ->add('Phone', TextType::class, array(
+                'attr' => array(
+                    'class' => 'form-control mb-3 custom-input',
+                )
+            ))
+            ->add('email', EmailType::class, array(
+                'attr' => array(
+                    'class' => 'form-control mb-3',
+                )
+            ))
+            ->add('username', TextType::class, array(
+                'attr' => array(
+                    'class' => 'form-control mb-3',
+                )
+            ))
+            ->add('save', SubmitType::class,  array(
+                'label' => 'Update',
+                'attr' => array(
+                    'class' => 'btn btn-block btn-primary mt-4'
+                )))
+            ->getForm();
+
+
+
+        $form->handleRequest($request);
+
+
+
+
+        if($form->isSubmitted() && $form->isValid())
+        {
+
+            $user = $form->getData();
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($user);
+            $em->flush();
+
+            $this->addFlash('success', 'Account details updated');
+
+        }
+
+
         // replace this line with your own code!
         return $this->render('user/account.html.twig', array(
             'user' => $user,
-            'page_title' => $page_title
+            'page_title' => $page_title,
+            'form' => $form->createView()
+
         ));
+    }
+
+
+    /**
+     * @Route("/user/account/update/password", name="user_update_password")
+     */
+    public function update_password(Request $request, UserPasswordEncoderInterface $encoder)
+    {
+        $user = $this->getUser();
+
+
+
+        $current_password = $request->request->get('current_password');
+        $new_password = $request->request->get('new_password');
+        $confirm_password = $request->request->get('confirm_password');
+
+
+
+        if(!empty($current_password))
+        {
+
+            if($new_password == $confirm_password) {
+
+
+                if($encoder->isPasswordValid($user, $current_password) === TRUE)
+                {
+                    $user->setPassword($encoder->encodePassword($user, $new_password));
+
+                    $em = $this->getDoctrine()->getManager();
+                    $em->persist($user);
+                    $em->flush();
+
+                    $this->addFlash('success', 'Password updated');
+
+                }else{
+                    $this->addFlash('error', 'Current password is incorrect');
+                }
+
+
+            }else{
+
+                $this->addFlash('error', 'New passwords do not match');
+
+            }
+
+        }
+
+
+return $this->redirectToRoute('user_account');
+
+
     }
 
 
