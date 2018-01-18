@@ -36,10 +36,84 @@ class UserController extends Controller
         $user = $this->getUser();
         $page_title = "Dashboard";
 
-        // replace this line with your own code!
+        $mda = $this->getDoctrine()
+            ->getRepository(Mda::class)
+            ->findOneBy([
+                'mda_code' => $user->getMdacode()
+            ]);
+
+        $u_mda = $user->getMdaCode();
+
+        $em = $this->getDoctrine()->getManager();
+
+        // get all trainings
+        $query2 = "SELECT training.* FROM training WHERE training.id NOT IN(
+SELECT training_participant.training_id FROM training_participant WHERE training_participant.mda_code='$u_mda'
+)";
+
+        $statement2 = $em->getConnection()->prepare($query2);
+        $statement2->execute();
+        $avail_training = $statement2->fetchAll();
+
+
+
+        // get trainings applied for
+
+        $mda_code = $user->getMdaCode();
+        $query = "SELECT * FROM training_participant WHERE mda_code='$mda_code' GROUP BY mda_code,training_id";
+
+        $statement = $em->getConnection()->prepare($query);
+        $statement->execute();
+        $result = $statement->fetchAll();
+
+
+        // get pending invoice
+        $invoice = $this->getDoctrine()
+            ->getRepository(Invoice::class)
+            ->findBy([
+               'mda_code' => $user->getMdaCode(),
+                'payment_status' => 0
+            ]);
+
+
+        // get registered participants
+        $participants = $this->getDoctrine()
+            ->getRepository(TrainingParticipant::class)
+            ->findBy([
+                'mda_code' => $user->getMdaCode(),
+            ]);
+
+
+        $reg_participants = array();
+
+        foreach($participants as $participant)
+        {
+
+            $training = $this->getDoctrine()
+                ->getRepository(Training::class)
+                ->find($participant->getTrainingId());
+
+            $session = $this->getDoctrine()
+                ->getRepository(TrainingSession::class)
+                ->find($participant->getSessionId());
+
+            $row['name'] = $participant->getParticipantName();
+            $row['training_title'] = $training->getTitle();
+            $row['session_name'] = $session->getName();
+
+
+            array_push($reg_participants, $row);
+        }
+
+
         return $this->render('user/dashboard.html.twig', array(
             'user' => $user,
-            'page_title' => $page_title
+            'page_title' => $page_title,
+            'trainings_available' => count($avail_training),
+            'trainings_applied' => count($result),
+            'pending_invoice' => count($invoice),
+            'training_participants' => $reg_participants,
+            'mda' => $mda
         ));
     }
 
@@ -64,6 +138,7 @@ class UserController extends Controller
             'user' => $user,
             'page_title' => $page_title,
             'mda' => $mda
+
 
         ));
     }
