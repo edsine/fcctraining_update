@@ -161,7 +161,7 @@ SELECT training_participant.training_id FROM training_participant WHERE training
             $invoice->setPaymentStatus("0");
             $invoice->setMdaCode($user->getMdaCode());
             $invoice->setTrainingId($training->getId());
-            $invoice->setPaymentAmount("");
+
 
             // calculate invoice charge based on number of participants
             $all_participants = count($form_participants);
@@ -179,7 +179,7 @@ SELECT training_participant.training_id FROM training_participant WHERE training
 
             $extra_partcipants_charge = $extra_partcipants * $training->getExtraPersonnelAmount();
 
-            $total_charge = $main_partcipants_charge + $extra_partcipants_charge;
+            $total_charge = $training->getRegistrationFee() + $main_partcipants_charge + $extra_partcipants_charge;
 
             $invoice->setPaymentAmount($total_charge);
 
@@ -294,27 +294,26 @@ SELECT training_participant.training_id FROM training_participant WHERE training
                 ->getRepository(TrainingSession::class)
                 ->find($participant->getSessionId());
 
-            $invoice = $this->getDoctrine()
+            $iv = $this->getDoctrine()
                 ->getRepository(Invoice::class)
                 ->find($participant->getInvoiceId());
 
             $row['name'] = $participant->getParticipantName();
             $row['session'] = $training_session->getName();
             $row['attended'] = $participant->getAttended();
-            $row['payment_status'] = $invoice->getPaymentStatus();
+            $row['payment_status'] = $iv->getPaymentStatus();
+            $row['invoice_id'] = $iv->getId();
 
             array_push($participants, $row);
         }
 
-
-        print_r($invoice);
 
         return $this->render('user/view_training.html.twig', array(
             'user' => $user,
             'page_title' => $page_title,
             'training' => $training,
             'training_participants' => $participants,
-            'invoices22' => $invoice
+            'invoices' => $invoice
         ));
 
     }
@@ -329,11 +328,122 @@ SELECT training_participant.training_id FROM training_participant WHERE training
         $user = $this->getUser();
         $page_title = "Invoice";
 
+
+        $invoice = $this->getDoctrine()
+            ->getRepository(Invoice::class)
+            ->findby([
+                'mda_code' => $user->getMdaCode()
+            ]);
+
         // replace this line with your own code!
         return $this->render('user/invoice.html.twig', array(
             'user' => $user,
-            'page_title' => $page_title
+            'page_title' => $page_title,
+            'invoices' => $invoice
         ));
+    }
+
+
+    /**
+     * @Route("/user/invoice/{id}", name="user_view_invoice")
+     */
+    public function generate_invoice($id)
+    {
+        $user = $this->getUser();
+        $page_title = "Invoice";
+
+
+        $invoice = $this->getDoctrine()
+            ->getRepository(Invoice::class)
+            ->find($id);
+
+        $mda = $this->getDoctrine()
+            ->getRepository(Mda::class)
+            ->findOneby([
+             'mda_code' => $invoice->getMdaCode()
+            ]);
+
+        $training = $this->getDoctrine()
+            ->getRepository(Training::class)
+            ->findOneby([
+                'id' => $invoice->getTrainingId()
+            ]);
+
+
+        $invoice_id = $invoice->getId();
+        $em = $this->getDoctrine()->getManager();
+
+        $query = $em->getConnection()->prepare("SELECT id FROM training_participant WHERE invoice_id='$invoice_id'");
+        $query->execute();
+        $participants_count = $query->fetchAll();
+
+
+        // replace this line with your own code!
+        return $this->render('user/view_invoice.html.twig', array(
+            'user' => $user,
+            'page_title' => $page_title,
+            'invoice' => $invoice,
+            'mda' => $mda,
+            'training' => $training,
+            'payment_id' => $this->randomString(9),
+            'participants_count' => count($participants_count),
+            'date' => date('l, F j Y', strtotime(date('Y-m-d')))
+        ));
+    }
+
+    /**
+     * @Route("/user/invoice/{id}/payment/verify/online", name="verify_invoice_online_payment")
+     */
+    public function verify_online_payment(Request $request, $id)
+    {
+        $user = $this->getUser();
+        $page_title = "Account";
+
+        $pay_id = $request->request->get('reference');
+
+        $secret = "sk_test_7e5cf417ea28b280919241b1c619eab1a3d0c5ed";
+        $result = array();
+//The parameter after verify/ is the transaction reference to be verified
+        $url = "https://api.paystack.co/transaction/verify/$pay_id";
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt(
+            $ch, CURLOPT_HTTPHEADER, [
+                "Authorization: Bearer $secret"]
+        );
+        $request = curl_exec($ch);
+        curl_close($ch);
+
+        if ($request) {
+            $result = json_decode($request, true);
+        }
+
+        $payment_status = "unknown";
+
+        if($result['data']['status'] == 'success')
+        {
+            $payment_status = "success";
+        }
+
+
+        $invoice = $this->getDoctrine()
+            ->getRepository(Invoice::class)
+            ->find($id);
+
+        $em = $this->getDoctrine()->getManager();
+
+        $invoice->setPaymentStatus('1');
+        $invoice->setPaymentMethod('Online');
+        $invoice->setPaymentId($pay_id);
+        $em->persist($invoice);
+        $em->flush();
+
+        return $this->redirectToRoute('user_view_invoice', array(
+            'id' => $id
+        ));
+
     }
 
 
@@ -351,4 +461,16 @@ SELECT training_participant.training_id FROM training_participant WHERE training
             'page_title' => $page_title
         ));
     }
+
+
+    public function randomString($length = 6) {
+    $str = "";
+    $characters = array_merge(range('A','X'), range('a','z'), range('0','9'));
+    $max = count($characters) - 1;
+    for ($i = 0; $i < $length; $i++) {
+        $rand = mt_rand(0, $max);
+        $str .= $characters[$rand];
+    }
+return $str;
+}
 }

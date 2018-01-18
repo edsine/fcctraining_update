@@ -44,18 +44,16 @@ header .navbar-nav .nav-item {
   margin-right: -50%; }
 
 @media print {
-  body * {
-    visibility: hidden; }
-
   #letter, #letter * {
     visibility: visible; }
 
   #letter {
-    position: absolute;
-    left: 0;
+    position: absolute !Important;
+    left: 0 !Important;
+    width: 100vw !Important;
     padding: 30px;
     border: none;
-    top: 0; }
+    top: 0 !important; }
 
   #letter p font, #letter p font b, #letter p b u, #letter p b {
     font-family: "Times New Roman" !important;

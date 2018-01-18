@@ -43,6 +43,25 @@ function printContent(el){
 }
 
 
+function printElem(divId) {
+    var content = document.getElementById(divId).innerHTML;
+    var mywindow = window.open('', 'Print', 'height=600,width=800');
+
+    mywindow.document.write('<html><head><title>Print</title>');
+    mywindow.document.write('<link rel="stylesheet" href="../../../assets/css/bootstrap.min.css" media="screen, print" type="text/style">');
+    //mywindow.document.write('<link rel="stylesheet" href="../../../assets/look_css/css/look_base_v2.css" type="text/style">');
+    mywindow.document.write('<link rel="stylesheet" href="../../../assets/css/style.css" type="text/style">');
+    mywindow.document.write('</head><body >');
+    mywindow.document.write(content);
+    mywindow.document.write('</body></html>');
+
+    mywindow.document.close();
+    mywindow.focus()
+    mywindow.print();
+    //mywindow.close();
+    return true;
+}
+
 
  toastr.options = {
   "closeButton": true,

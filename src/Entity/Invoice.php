@@ -37,6 +37,11 @@ class Invoice
     private $payment_method;
 
     /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $payment_id;
+
+    /**
      * @ORM\Column(type="boolean")
      */
     private $payment_status;
@@ -135,6 +140,22 @@ class Invoice
     public function setTrainingId($training_id)
     {
         $this->training_id = $training_id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPaymentId()
+    {
+        return $this->payment_id;
+    }
+
+    /**
+     * @param mixed $payment_id
+     */
+    public function setPaymentId($payment_id)
+    {
+        $this->payment_id = $payment_id;
     }
 
 
