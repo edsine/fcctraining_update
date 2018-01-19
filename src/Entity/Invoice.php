@@ -52,7 +52,8 @@ class Invoice
     private $payment_status;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="text",  nullable=true)
+     *
      */
     private $payment_evidence;
 

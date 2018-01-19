@@ -19,7 +19,16 @@ $(document).ready(function() {
     $( ".datepicker" ).datepicker({ dateFormat: 'yy-mm-dd',  minDate: "0"  });
 
 
-    $('.datatable').DataTable();
+    $('.datatable').DataTable({
+        dom: 'Blfrtip',
+        buttons: [
+            'copy', 'excel', 'pdf', 'print', 'colvis'
+        ]
+    });
+
+    table.buttons().container()
+        .appendTo( '#example_wrapper .col-md-6:eq(0)' );
+
 
 
 

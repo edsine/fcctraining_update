@@ -22,6 +22,11 @@ header .navbar-nav .nav-item {
     letter-spacing: .05em;
     color: #fff !Important; }
 
+.dataTables_wrapper .dt-buttons {
+  margin-bottom: 10px !important; }
+.dataTables_wrapper .dataTables_length {
+  margin-bottom: -50px !important; }
+
 .hline {
   overflow: hidden;
   text-align: center; }

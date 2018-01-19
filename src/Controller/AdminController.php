@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Invoice;
 use App\Entity\Training;
 use App\Entity\TrainingParticipant;
 use App\Entity\TrainingSession;
@@ -12,6 +13,7 @@ use App\Entity\MdaParticipant;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -91,7 +93,7 @@ class AdminController extends Controller
         $mda = new Mda();
 
         $form = $this->createFormBuilder($mda)
-            ->add('Username', TextType::class, array(
+            ->add('Name', TextType::class, array(
                 'attr' => array(
                     'class' => 'form-control mb-3'
                 )
@@ -101,10 +103,9 @@ class AdminController extends Controller
                     'class' => 'form-control mb-3'
                 )
             ))
-            ->add('Address', TextareaType::class, array(
+            ->add('Address', TextType::class, array(
                 'attr' => array(
-                    'class' => 'form-control mb-3',
-                    'rows' => '4'
+                    'class' => 'form-control mb-3'
                 )
             ))
             ->add('Phone', IntegerType::class, array(
@@ -164,13 +165,13 @@ class AdminController extends Controller
     public function participants()
     {
         $user = $this->getUser();
-        $page_title = "Participants";
+        $page_title = "MDA Admins";
 
         $participants = $this->getDoctrine()
             ->getRepository(mdaParticipant::class)
             ->findAll();
 
-        return $this->render('admin/participants.html.twig', array(
+        return $this->render('admin/mda_admins.html.twig', array(
             'user' => $user,
             'page_title' => $page_title,
             'participants' => $participants
@@ -183,7 +184,7 @@ class AdminController extends Controller
     public function view_participants($id)
     {
         $user = $this->getUser();
-        $page_title = "Participants";
+        $page_title = "MDA Admins";
 
         // get participant info
         $participant = $this->getDoctrine()
@@ -194,23 +195,8 @@ class AdminController extends Controller
         $applied_training = $this->getDoctrine()
             ->getRepository(TrainingParticipant::class)
             ->findBy([
-                'participant_id' => $id
+                'id' => $id
             ]);
-
-        // start participant trainings array
-        $participants_trainings = array();
-
-
-        foreach($applied_training as $train)
-        {
-            $training = $this->getDoctrine()
-                ->getRepository(Training::class)
-                ->find($train->getTrainingId());
-
-
-            array_push($participants_trainings, $training);
-        }
-
 
 
         // get mda info
@@ -223,8 +209,7 @@ class AdminController extends Controller
             'user' => $user,
             'page_title' => $page_title,
             'participant' => $participant,
-            'mda' => $mda,
-            'trainings' => $participants_trainings
+            'mda' => $mda
         ));
     }
 
@@ -234,10 +219,10 @@ class AdminController extends Controller
     public function mda_participants(Request $request, $mda_code)
     {
         $user = $this->getUser();
-        $page_title = "Participants";
+        $page_title = "MDA Admins";
 
 
-        return $this->render('admin/participants.html.twig', array(
+        return $this->render('admin/mda_admins.html.twig', array(
             'user' => $user,
             'page_title' => $page_title
         ));
@@ -542,13 +527,6 @@ class AdminController extends Controller
             ->getRepository(Training::class)
             ->find($id);
 
-
-        // get training participants information
-        $training_participant = $this->getDoctrine()
-            ->getRepository(TrainingParticipant::class)
-            ->findAll();
-
-
         // get training session information
         $training_session = $this->getDoctrine()
             ->getRepository(Trainingsession::class)
@@ -556,31 +534,84 @@ class AdminController extends Controller
                 'training_id' => $id
             ]);
 
+        $invoice = $this->getDoctrine()
+            ->getRepository(Invoice::class)
+            ->findby([
+                'training_id' => $training->getId()
+            ]);
+
         $em = $this->getDoctrine()->getManager();
 
 
-        // start new training participant array
-        $t_participant = array();
+        // get all mda participants for this training
+        $training_participants = $this->getDoctrine()
+            ->getRepository(TrainingParticipant::class)
+            ->findby([
+                'training_id' => $training->getId()
+            ]);
 
-        // extract and arrange the training participant array
-        foreach($training_participant as $tp) {
 
-            $part = $this->getDoctrine()
-                ->getRepository(MdaParticipant::class)
-                ->find($tp->getId());
+        // start new mda participants array
+        $participants = array();
 
+        $attended_participants = array();
+
+
+        foreach($training_participants as $participant)
+        {
+
+            $training_session2 = $this->getDoctrine()
+                ->getRepository(TrainingSession::class)
+                ->find($participant->getSessionId());
+
+            $iv = $this->getDoctrine()
+                ->getRepository(Invoice::class)
+                ->find($participant->getInvoiceId());
 
             $mda = $this->getDoctrine()
                 ->getRepository(Mda::class)
-                ->findOneBy(['mda_code' => $tp->getMdaCode()]);
-
-            $m['participantid'] = $tp->getId();
-            $m['participant'] = $tp->getParticipantName();
-            $m['mdacode'] = $tp->getMdaCode();
-            $m['mda'] = $mda->getName();
+                ->findOneby([
+                    'mda_code' => $participant->getMdaCode()
+                ]);
 
 
-            array_push($t_participant, $m);
+            $row['name'] = $participant->getParticipantName();
+            $row['email'] = $participant->getParticipantEmail();
+            $row['phone'] = $participant->getParticipantPhone();
+            $row['session'] = $training_session2->getName();
+            $row['attended'] = $participant->getAttended();
+            $row['mda'] = $mda->getName();
+            $row['payment_status'] = $iv->getPaymentStatus();
+            $row['invoice_id'] = $iv->getId();
+
+            array_push($participants, $row);
+
+            if($participant->getAttended() == 1)
+            {
+                array_push($attended_participants, $row);
+            }
+        }
+
+
+        $new_invoice_array = array();
+
+        foreach($invoice as $inv)
+        {
+            $mda = $this->getDoctrine()
+                ->getRepository(Mda::class)
+                ->findOneby([
+                    'mda_code' => $inv->getMdaCode()
+                ]);
+
+            $row['id'] = $inv->getId();
+            $row['paymentid'] = $inv->getPaymentId();
+            $row['paymentamount'] = $inv->getPaymentAmount();
+            $row['paymentstatus'] = $inv->getPaymentStatus();
+            $row['paymentmethod'] = $inv->getPaymentmethod();
+            $row['mda'] = $mda->getName();
+
+            array_push($new_invoice_array, $row);
+
         }
 
 
@@ -588,9 +619,10 @@ class AdminController extends Controller
         return $this->render('admin/view_training.html.twig', array(
             'user' => $user,
             'page_title' => $page_title,
-            'training_participants' => $t_participant,
+            'training_participants' => $participants,
+            'attended_participants' => $attended_participants,
             'training' => $training,
-            'count_participant' => count($t_participant),
+            'invoices' => $new_invoice_array,
             'training_sessions' => $training_session,
         ));
 
@@ -880,5 +912,223 @@ class AdminController extends Controller
             'total_cash' => $cash_amount[0]['total_cash_amount'],
             'total_undertaken' => count($undertaken_count)
         ));
+    }
+
+    /**
+     * @Route("/admin/invoice/{id}", name="admin_view_invoice")
+     */
+    public function admin_view_invoice(Request $request, $id)
+    {
+        $user = $this->getUser();
+        $page_title = "Financials";
+
+        $em = $this->getDoctrine()->getManager();
+
+        $invoice = $this->getDoctrine()
+            ->getRepository(Invoice::class)
+            ->find($id);
+
+        $mda = $this->getDoctrine()
+            ->getRepository(Mda::class)
+            ->findOneby([
+                'mda_code' => $invoice->getMdaCode()
+            ]);
+
+        $training = $this->getDoctrine()
+            ->getRepository(Training::class)
+            ->findOneby([
+                'id' => $invoice->getTrainingId()
+            ]);
+
+        $training_id = $training->getId();
+        $invoice_id = $invoice->getId();
+
+        $mda_code = $mda->getMdaCode();
+        $query4 = $em->getConnection()->prepare("SELECT * FROM training_participant WHERE training_id='$training_id' AND mda_code='$mda_code' AND invoice_id='$invoice_id'");
+        $query4->execute();
+        $all_participants = count($query4->fetchAll());
+
+
+
+        if($all_participants >= $training->getIndividualsPerMda())
+        {
+            $d_participants = $training->getIndividualsPerMda();
+
+            $d_extra_participants = $all_participants - $d_participants;
+
+        }elseif($all_participants < $training->getIndividualsPerMda())
+        {
+
+            $d_participants = $all_participants;
+            $d_extra_participants = 0;
+        }
+
+
+
+        $form = $this->createFormBuilder()
+            ->add('PaymentEvidence', FileType::class, array(
+                'attr' => array(
+                    'class' => 'custom-input form-control mb-3'
+                )
+            ))
+            ->add('Upload', SubmitType::class, array(
+                'attr' => array(
+                    'class' => 'btn btn-primary'
+                )
+            ))
+            ->getForm();
+
+
+        $form->handleRequest($request);
+
+
+            if ($form->isSubmitted() && $form->isValid()) {
+
+                $data = $form->getData();
+
+
+                //upload directory
+                $dir = '../public/payment_evidence/';
+
+                //generate random file name
+                $new_filename = strtotime("now");
+
+                // get file size
+                $size = $data['PaymentEvidence']->getSize();
+
+                // validate file size
+                if($size < 1900000)
+                {
+
+                    $type = $data['PaymentEvidence']->getMimeType();
+
+                    $accepted_file_types = array("image/png", "image/jpg", "image/jpeg", "application/pdf");
+
+                    if (in_array($type, $accepted_file_types)) {
+
+                        $extension = $data['PaymentEvidence']->guessExtension();
+
+                        $data['PaymentEvidence']->move($dir, "$new_filename.$extension");
+
+                        $invoice->setPaymentevidence("/payment_evidence/"."$new_filename.$extension");
+
+                        $em->persist($invoice);
+                        $em->flush();
+
+                        $this->addFlash('success', 'Payment evidence uploded');
+
+                    }else{
+
+                        $this->addFlash('error', "$type File type not supported");
+                    }
+
+
+                }else{
+
+                    $this->addFlash('error', 'File size is higher than 1.9MB');
+
+                }
+
+            }
+
+
+
+
+        $query = $em->getConnection()->prepare("SELECT id FROM training_participant WHERE invoice_id='$invoice_id'");
+        $query->execute();
+        $participants_count = $query->fetchAll();
+
+
+        // replace this line with your own code!
+        return $this->render('admin/view_invoice.html.twig', array(
+            'user' => $user,
+            'page_title' => $page_title,
+            'invoice' => $invoice,
+            'all_main_participants' => $d_participants,
+            'all_extra_participants' => $d_extra_participants,
+            'mda' => $mda,
+            'training' => $training,
+            'form' => $form->createView(),
+            'payment_id' => $this->randomString(9),
+            'participants_count' => count($participants_count),
+            'date' => date('l, F j Y', strtotime(date('Y-m-d')))
+        ));
+    }
+
+
+
+    /**
+     * @Route("/admin/invoice/{id}/pay/cash", name="admin_pay_invoice_cash")
+     */
+    public function admin_invoice_cash($id)
+    {
+        $user = $this->getUser();
+
+
+        $invoice = $this->getDoctrine()
+            ->getRepository(Invoice::class)
+            ->find($id);
+
+        $invoice->setPaymentMethod('Cash');
+        $invoice->setPaymentStatus('1');
+
+        $em = $this->getDoctrine()->getManager();
+
+        $em->persist($invoice);
+        $em->flush();
+
+        return $this->redirectToRoute('admin_view_invoice', array(
+
+            'id' => $invoice->getId()
+
+        ));
+
+    }
+
+
+    /**
+     * @Route("/admin/invoice/{id}/pay/bank", name="admin_pay_invoice_bank")
+     */
+    public function admin_invoice_bank($id)
+    {
+        $user = $this->getUser();
+
+
+        $invoice = $this->getDoctrine()
+            ->getRepository(Invoice::class)
+            ->find($id);
+
+        $invoice->setPaymentMethod('Bank Transfer');
+        $invoice->setPaymentStatus('1');
+
+        $em = $this->getDoctrine()->getManager();
+
+        $em->persist($invoice);
+        $em->flush();
+
+        return $this->redirectToRoute('admin_view_invoice', array(
+
+            'id' => $invoice->getId()
+
+        ));
+
+    }
+
+
+
+
+
+
+
+
+    public function randomString($length = 6) {
+        $str = "";
+        $characters = array_merge(range('A','X'), range('a','z'), range('0','9'));
+        $max = count($characters) - 1;
+        for ($i = 0; $i < $length; $i++) {
+            $rand = mt_rand(0, $max);
+            $str .= $characters[$rand];
+        }
+        return $str;
     }
 }
