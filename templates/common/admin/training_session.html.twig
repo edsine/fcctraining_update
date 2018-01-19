@@ -57,7 +57,7 @@
                             </td>
 
                             <td>
-                                <a href="" class="btn btn-xs btn-primary mb-1"><i class="fa fa-users"></i> View participants</a>
+                                <a href="{{ path('admin_training_session', { 'id':session.id }) }}" class="btn btn-xs btn-primary mb-1"><i class="fa fa-users"></i> View participants</a>
                                 {% if session.status == '1' %}
                                 <a href="{{ path('admin_close_training_session', { 'id' : session.id }) }}" class="btn btn-danger btn-xs"><i class="fa fa-exclamation-circle"></i> Close registration</a>
                                 {% elseif (session.status == '0') or (session.status == 2) %}

@@ -615,6 +615,37 @@ class AdminController extends Controller
         }
 
 
+        // get bank payments
+        $qu1 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as pay_amount FROM invoice WHERE payment_status='1' AND payment_method='Bank Transfer'");
+        $qu1->execute();
+        $bank_pay = $qu1->fetchAll();
+
+        // get cash payments
+        $qu2 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as cash_pay_amount FROM invoice WHERE payment_status='1' AND payment_method='Cash'");
+        $qu2->execute();
+        $cash_pay = $qu2->fetchAll();
+
+        // get undertaken payments
+        $qu3 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as undertaken_pay_amount FROM invoice WHERE payment_status='0' AND payment_method='Undertaken'");
+        $qu3->execute();
+        $undertaken_pay = $qu3->fetchAll();
+
+        // get online payments
+        $qu4 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as online_pay_amount FROM invoice WHERE payment_status='1' AND payment_method='Online'");
+        $qu4->execute();
+        $online_pay = $qu4->fetchAll();
+
+        // get all payments
+        $qu5 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as total_pay_amount FROM invoice WHERE payment_status='1' ");
+        $qu5->execute();
+        $total_pay = $qu5->fetchAll();
+
+        // get outstanding payments
+        $qu6 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as out_pay_amount FROM invoice WHERE payment_status='0'");
+        $qu6->execute();
+        $ontstanding_pay = $qu6->fetchAll();
+
+
         // render to view
         return $this->render('admin/view_training.html.twig', array(
             'user' => $user,
@@ -623,7 +654,100 @@ class AdminController extends Controller
             'attended_participants' => $attended_participants,
             'training' => $training,
             'invoices' => $new_invoice_array,
+            'total_bank_payment' => $bank_pay[0]['pay_amount'],
+            'total_cash_payment' => $cash_pay[0]['cash_pay_amount'],
+            'total_undertaken_payment' => $undertaken_pay[0]['undertaken_pay_amount'],
+            'total_online_payment' => $online_pay[0]['online_pay_amount'],
+            'total_payment' => $total_pay[0]['total_pay_amount'],
+            'total_outstanding_payment' => $ontstanding_pay[0]['out_pay_amount'],
             'training_sessions' => $training_session,
+        ));
+
+    }
+
+
+    /**
+     * @Route("/admin/training/session/{id}", name="admin_training_session")
+     *
+     */
+    public function training_session($id)
+    {
+
+        $user = $this->getUser();
+        $page_title = "Training";
+
+        // get training session information
+        $training_session = $this->getDoctrine()
+            ->getRepository(Trainingsession::class)
+            ->find($id);
+
+        // get training information
+        $training = $this->getDoctrine()
+            ->getRepository(Training::class)
+            ->findOneBy([
+                'id' => $training_session->getTrainingId()
+            ]);
+
+
+        // get all mda participants for this training session
+        $training_participants = $this->getDoctrine()
+            ->getRepository(TrainingParticipant::class)
+            ->findby([
+                'training_id' => $training->getId(),
+                'session_id' => $id
+            ]);
+
+
+        // start new mda participants array
+        $participants = array();
+
+        $attended_participants = array();
+
+
+        foreach($training_participants as $participant)
+        {
+
+            $training_session2 = $this->getDoctrine()
+                ->getRepository(TrainingSession::class)
+                ->find($participant->getSessionId());
+
+            $iv = $this->getDoctrine()
+                ->getRepository(Invoice::class)
+                ->find($participant->getInvoiceId());
+
+            $mda = $this->getDoctrine()
+                ->getRepository(Mda::class)
+                ->findOneby([
+                    'mda_code' => $participant->getMdaCode()
+                ]);
+
+
+            $row['name'] = $participant->getParticipantName();
+            $row['email'] = $participant->getParticipantEmail();
+            $row['phone'] = $participant->getParticipantPhone();
+            $row['session'] = $training_session2->getName();
+            $row['attended'] = $participant->getAttended();
+            $row['mda'] = $mda->getName();
+            $row['payment_status'] = $iv->getPaymentStatus();
+            $row['invoice_id'] = $iv->getId();
+
+            array_push($participants, $row);
+
+            if($participant->getAttended() == 1)
+            {
+                array_push($attended_participants, $row);
+            }
+        }
+
+
+        // render to view
+        return $this->render('admin/training_session.html.twig', array(
+            'user' => $user,
+            'page_title' => $page_title,
+            'training_participants' => $participants,
+            'attended_participants' => $attended_participants,
+            'training' => $training,
+            'training_session' => $training_session,
         ));
 
     }
@@ -781,136 +905,44 @@ class AdminController extends Controller
 
 
         /**
-     * @Route("/admin/financial", name="admin_financials")
+     * @Route("/admin/invoice", name="admin_invoice")
      */
-    public function financials()
+    public function invoice()
     {
         $user = $this->getUser();
-        $page_title = "Financials";
+        $page_title = "Invoice";
 
-        $em = $this->getDoctrine()->getManager();
-
-        // select and sum all card payments
-        $query = "SELECT SUM(amount_paid) AS total_card_amount FROM training_participant WHERE payment_method='card' ";
-
-        $statement = $em->getConnection()->prepare($query);
-        $statement->execute();
-        $card_amount = $statement->fetchAll();
+       $invoices = $this->getDoctrine()
+           ->getRepository(Invoice::class)
+           ->findAll();
 
 
-        // select and sum all cash payments
-        $query2 = "SELECT SUM(amount_paid) AS total_cash_amount FROM training_participant WHERE payment_method='cash' ";
 
-        $statement2 = $em->getConnection()->prepare($query2);
-        $statement2->execute();
-        $cash_amount = $statement2->fetchAll();
+        $new_invoice_array = array();
 
-
-        // select and sum all undertaken
-        $undertaken_count = $this->getDoctrine()
-            ->getRepository(TrainingParticipant::class)
-            ->findBy([
-                'payment_method' => 'undertaken'
-            ]);
-
-
-        // get training participants information
-        $training_participant = $this->getDoctrine()
-            ->getRepository(TrainingParticipant::class)
-            ->findBy([
-                'payment_method' => 'cash',
-                'payment_method' => 'card'
-            ]);
-
-        // get training participants information
-        $outstanding_training_participant = $this->getDoctrine()
-            ->getRepository(TrainingParticipant::class)
-            ->findBy([
-                'payment_method' => 'undertaken'
-            ]);
-
-
-        // start new training participant array
-        $t_participant = array();
-
-        // start new outstanding training participant array
-        $outstanding_participants = array();
-
-
-        // extract and arrange the training participant array
-        foreach($training_participant as $tp) {
-
-            $part = $this->getDoctrine()
-                ->getRepository(MdaParticipant::class)
-                ->find($tp->getParticipantId());
-
-            // get training information
-            $training = $this->getDoctrine()
-                ->getRepository(Training::class)
-                ->find($tp->getTrainingId());
-
-            // get mda information
+        foreach($invoices as $inv)
+        {
             $mda = $this->getDoctrine()
                 ->getRepository(Mda::class)
-                ->findOneBy(['mda_code' => $tp->getMdaCode()]);
+                ->findOneby([
+                    'mda_code' => $inv->getMdaCode()
+                ]);
 
-            // assign variables
-            $m['participantid'] = $tp->getParticipantId();
-            $m['participant'] = $part->getUsername();
-            $m['mdacode'] = $tp->getMdaCode();
-            $m['mda'] = $mda->getName();
-            $m['training_id'] = $training->getId();
-            $m['training_title'] = $training->getTitle();
-            $m['amountpaid'] = $tp->getAmountPaid();
-            $m['paymentmethod'] = $tp->getPaymentMethod();
-            $m['paymentstatus'] = $tp->getPaymentStatus();
-            $m['paymentdate'] = $tp->getPaymentDATE();
+            $row['id'] = $inv->getId();
+            $row['paymentid'] = $inv->getPaymentId();
+            $row['paymentamount'] = $inv->getPaymentAmount();
+            $row['paymentstatus'] = $inv->getPaymentStatus();
+            $row['paymentmethod'] = $inv->getPaymentmethod();
+            $row['mda'] = $mda->getName();
 
+            array_push($new_invoice_array, $row);
 
-            array_push($t_participant, $m);
         }
 
-
-
-        // extract and arrange the outstanding training participant array
-        foreach($outstanding_training_participant as $tp) {
-
-            $part = $this->getDoctrine()
-                ->getRepository(MdaParticipant::class)
-                ->find($tp->getParticipantId());
-
-            // get training information
-            $training = $this->getDoctrine()
-                ->getRepository(Training::class)
-                ->find($tp->getTrainingId());
-
-            // get mda information
-            $mda = $this->getDoctrine()
-                ->getRepository(Mda::class)
-                ->findOneBy(['mda_code' => $tp->getMdaCode()]);
-
-            // assign variables
-            $m['participantid'] = $tp->getParticipantId();
-            $m['participant'] = $part->getUsername();
-            $m['mdacode'] = $tp->getMdaCode();
-            $m['mda'] = $mda->getName();
-            $m['training_id'] = $training->getId();
-            $m['training_title'] = $training->getTitle();
-            $m['outstandingamount'] = $training->getIndividualAmount();
-
-
-            array_push($outstanding_participants, $m);
-        }
-
-
-        return $this->render('admin/financials.html.twig', array(
+        return $this->render('admin/invoice.html.twig', array(
             'user' => $user,
             'page_title' => $page_title,
-            'training_participants' => $t_participant,
-            'outstanding_participants' => $outstanding_participants,
-            'total_card' => $card_amount[0]['total_card_amount'],
-            'total_cash' => $cash_amount[0]['total_cash_amount'],
-            'total_undertaken' => count($undertaken_count)
+            'invoices' => $new_invoice_array
         ));
     }
 
@@ -920,7 +952,7 @@ class AdminController extends Controller
     public function admin_view_invoice(Request $request, $id)
     {
         $user = $this->getUser();
-        $page_title = "Financials";
+        $page_title = "Invoice";
 
         $em = $this->getDoctrine()->getManager();
 
@@ -1100,6 +1132,34 @@ class AdminController extends Controller
 
         $invoice->setPaymentMethod('Bank Transfer');
         $invoice->setPaymentStatus('1');
+
+        $em = $this->getDoctrine()->getManager();
+
+        $em->persist($invoice);
+        $em->flush();
+
+        return $this->redirectToRoute('admin_view_invoice', array(
+
+            'id' => $invoice->getId()
+
+        ));
+
+    }
+
+
+    /**
+     * @Route("/admin/invoice/{id}/pay/undertaken", name="admin_pay_invoice_undertaken")
+     */
+    public function admin_invoice_undertaken($id)
+    {
+        $user = $this->getUser();
+
+
+        $invoice = $this->getDoctrine()
+            ->getRepository(Invoice::class)
+            ->find($id);
+
+        $invoice->setPaymentMethod('Undertaken');
 
         $em = $this->getDoctrine()->getManager();
 

@@ -1,3 +1,72 @@
+<div class="row">
+
+
+    <div class="col-md-6">
+
+        <div class="card">
+            <div class="card-body text-center bg-dark font-white">
+                <b class="text-uppercase font-xs">Total expected payments</b>
+                <p class="font-lg m-0">&#8358;{{ total_payment|number_format }}</p>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col-md-6">
+
+        <div class="card">
+            <div class="card-body bg-dark text-center font-white">
+                <b class="text-uppercase font-xs">Total outstanding payments</b>
+                <p class="font-lg m-0">&#8358;{{ total_outstanding_payment|number_format }}</p>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="card">
+            <div class="card-body bg-orange font-white">
+                <b class="text-uppercase font-xs">Total online payments</b>
+                <p class="font-lg m-0">&#8358;{{ total_online_payment|number_format }}</p>
+            </div>
+        </div>
+
+    </div>
+    <div class="col-md-3">
+
+        <div class="card">
+            <div class="card-body bg-green font-white">
+                <b class="text-uppercase font-xs">Total cash payments</b>
+                <p class="font-lg m-0">&#8358;{{ total_cash_payment|number_format }}</p>
+            </div>
+        </div>
+
+    </div>
+    <div class="col-md-3">
+
+        <div class="card">
+            <div class="card-body bg-blue font-white">
+                <b class="text-uppercase font-xs">Total bank payments</b>
+                <p class="font-lg m-0">&#8358;{{ total_bank_payment|number_format }}</p>
+            </div>
+        </div>
+
+    </div>
+    <div class="col-md-3">
+
+        <div class="card">
+            <div class="card-body bg-red font-white">
+                <b class="text-uppercase font-xs">Total undertaken</b>
+                <p class="font-lg m-0">&#8358;{{ total_undertaken_payment|number_format }}</p>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
 <div class="card">
     <div class="card-header">
         Invoice(s)

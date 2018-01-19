@@ -46,7 +46,7 @@
                 <button class="btn btn-xs btn-primary btn-xs mr-2" onclick="printElem('letter');"><i class="fa fa-print"></i> Print</button>
 
                 {% if invoice.paymentstatus == 0 %}
-                    <a href="" class="btn btn-xs btn-success mr-2"><i class="fa fa-file"></i> Pay with Undertaken</a>
+                    <a href="{{ path('admin_pay_invoice_undertaken', { 'id':invoice.id }) }}" class="btn btn-xs btn-success mr-2"><i class="fa fa-file"></i> Pay with Undertaken</a>
                     <a href="{{ path('admin_pay_invoice_cash', { 'id':invoice.id }) }}" class="btn btn-xs btn-success mr-2"><i class="fa fa-money"></i> Pay with Cash</a>
                     <a href="{{ path('admin_pay_invoice_bank', { 'id':invoice.id }) }}" class="btn btn-xs btn-success"><i class="fa fa-institution"></i> Pay by Bank transfer</a>
                 {% endif %}
