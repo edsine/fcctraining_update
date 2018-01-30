@@ -19,7 +19,8 @@
 
     </ul><span class="heading">Extras</span>
     <ul class="list-unstyled">
-        <li> <a href="#"> <i class="fa fa-users"></i>Admin Users</a></li>
+        <li class="{% if page_title == 'Account' %} active {% endif %}"><a href="{{ path('admin_account') }}"> <i class="fa fa-user"></i> My Account </a></li>
+        <li class="{% if page_title == 'Admin Users' %} active {% endif %}"> <a href="{{ path('admin_users') }}"> <i class="fa fa-users"></i>Admin Users</a></li>
 
     </ul>
 </nav>

@@ -60,6 +60,8 @@ function printElem(divId) {
     mywindow.document.write('<link rel="stylesheet" href="../../../assets/css/bootstrap.min.css" media="screen, print" type="text/style">');
     //mywindow.document.write('<link rel="stylesheet" href="../../../assets/look_css/css/look_base_v2.css" type="text/style">');
     mywindow.document.write('<link rel="stylesheet" href="../../../assets/css/style.css" type="text/style">');
+
+    mywindow.document.write(" <style>* {font-family: 'Times New Roman' !important; font-size:15px !Important}body{padding: 20px 70px !Important;color:#000 !Important}body a{color:#000 !Important;}.font-weight-900{font-weight: 900 !Important;}body p font,  p font b, p b u,  p b{font-family: 'Times New Roman' !important;font-size: 16px !Important;}img{font-family: 'Times New Roman' !important;-webkit-print-color-adjust: exact !Important;font-size: 14px !Important;margin-bottom: 20px !Important;}</style>");
     mywindow.document.write('</head><body >');
     mywindow.document.write(content);
     mywindow.document.write('</body></html>');

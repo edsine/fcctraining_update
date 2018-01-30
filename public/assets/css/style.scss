@@ -97,27 +97,41 @@ header
 
 @media print {
 
-  #letter, #letter * {
-    visibility: visible;
+   * {
+     font-family: "Times New Roman" !important;
+
+
   }
-  #letter {
+  body
+  {
+    font-size: 16px !Important;
+    padding: 50px !Important;
+
+  }
+
+ /* #letter {
     position: absolute !Important;
     left: 0 !Important;
     width: 100vw !Important;
-    padding: 30px;
+
     border:none;
     top: 0 !important;
   }
-
-  #letter p font, #letter p font b, #letter p b u, #letter p b
+*/
+  .font-weight-900
+  {
+    font-weight: 900 !Important;
+  }
+  body p font,  p font b, p b u,  p b
   {
     font-family: "Times New Roman" !important;
 
-    font-size: 14px !Important;
+    font-size: 16px !Important;
   }
 
-  #letter p, #letter a, #letter b
+  img
   {
+    font-family: "Times New Roman" !important;
     -webkit-print-color-adjust: exact !Important;
     font-size: 14px !Important;
     margin-bottom: 20px !Important;

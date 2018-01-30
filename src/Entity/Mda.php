@@ -48,6 +48,11 @@ class Mda
     private $phone;
 
     /**
+     * @ORM\Column(type="boolean", nullable = true)
+     */
+    private $not_attended;
+
+    /**
      * @ORM\Column(type="string", nullable = true)
      */
     private $top_official_designation;
@@ -164,6 +169,21 @@ class Mda
         $this->top_official_designation = $top_official_designation;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getNotAttended()
+    {
+        return $this->not_attended;
+    }
+
+    /**
+     * @param mixed $not_attended
+     */
+    public function setNotAttended($not_attended)
+    {
+        $this->not_attended = $not_attended;
+    }
 
 
 }

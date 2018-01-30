@@ -1,4 +1,4 @@
-{% extends 'access_base.html.twig' %}
+{% extends 'access_base_pdf.html.twig' %}
 
 {% block content %}
 
@@ -8,11 +8,12 @@
     <hr>
 
 
-    <button class="btn btn-primary" onclick="printContent('letter');"><i class="fa fa-print"></i> Print</button>
+    <button class="btn btn-primary btn-xs mr-2" onclick="printElem('letter');"><i class="fa fa-print"></i> Print</button>
 
-    <div class="padding_50 font-lg" id="letter" style="font-family: 'Times New Roman' !Important">
 
-        <img src="{{ asset('assets/images/letterhead.png') }}" style="max-width: 100%" class="mb-5">
+    <div class="padding_50 font-lg" id="letter" style="background-color:#fff !Important; width:100% !Important;font-family: 'Times New Roman' !Important">
+
+        <img src="{{ asset('assets/images/fcc_letterhead.png') }}" style="max-width: 100%" class="mb-5">
 
         <p class="float-right font-weight-900" style="margin-top: -3px">{{ date }}</p>
 
@@ -22,21 +23,15 @@
 
         <div class="clearfix mb-4"></div>
 
-        <p>{{ mda.topOfficialDesignation }},<br>
-        {{ mda.name }}.<br>
-            {{ mda.address }}.
-        </p>
+        <p class="m-0">{{ mda.topOfficialDesignation }},<br>
+            {{ mda.name }}.</p>
+        <div class="row">
+            <div class="col-8 m-0">{{ mda.address }}</div>
+        </div>
 
 
 
         <div class="clearfix mb-5"></div>
-        <div>
-{% autoescape false %}
-        {{ trainlet }}
-{% endautoescape %}
-        </div>
-
-        <img src="{{ asset('assets/images/letter_footer.png') }}" style="max-width: 100%" class="mt-5">
 
         {% autoescape false %}
             {{ train_letter_continue }}

@@ -31,7 +31,7 @@
                             <td>{{ mda.email }}</td>
                             <td>{{ mda.phone }}</td>
                             <td>{{ mda.address }}</td>
-                            <td><a href="" class="btn btn-xs btn-primary"><i class="fa fa-search"></i> View participants</a></td>
+                            <td><a href="{{ path('admin_edit_mda', { 'id':mda.id }) }}" class="btn btn-xs btn-warning"><i class="fa fa-pencil"></i> Edit</a></td>
                         </tr>
 
                     {% endfor %}

@@ -46,10 +46,65 @@ class AdminController extends Controller
         $user = $this->getUser();
         $page_title = "Dashboard";
 
+        $training = $this->getDoctrine()
+            ->getRepository(Training::class)
+            ->findAll();
+
+        $mda = $this->getDoctrine()
+            ->getRepository(Mda::class)
+            ->findAll();
+
+        $mda_admin = $this->getDoctrine()
+            ->getRepository(MdaParticipant::class)
+            ->findAll();
+
+        $em = $this->getDoctrine()->getManager();
+
+        // get bank payments
+        $qu1 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as pay_amount FROM invoice WHERE payment_status='1' AND payment_method='Bank Transfer'");
+        $qu1->execute();
+        $bank_pay = $qu1->fetchAll();
+
+        // get cash payments
+        $qu2 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as cash_pay_amount FROM invoice WHERE payment_status='1' AND payment_method='Cash'");
+        $qu2->execute();
+        $cash_pay = $qu2->fetchAll();
+
+        // get undertaken payments
+        $qu3 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as undertaken_pay_amount FROM invoice WHERE payment_status='0' AND payment_method='Undertaken'");
+        $qu3->execute();
+        $undertaken_pay = $qu3->fetchAll();
+
+        // get online payments
+        $qu4 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as online_pay_amount FROM invoice WHERE payment_status='1' AND payment_method='Online'");
+        $qu4->execute();
+        $online_pay = $qu4->fetchAll();
+
+        // get all payments
+        $qu5 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as total_pay_amount FROM invoice WHERE payment_status='1' ");
+        $qu5->execute();
+        $total_pay = $qu5->fetchAll();
+
+        // get outstanding payments
+        $qu6 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as out_pay_amount FROM invoice WHERE payment_status='0'");
+        $qu6->execute();
+        $ontstanding_pay = $qu6->fetchAll();
+
+
         // replace this line with your own code!
         return $this->render('admin/dashboard.html.twig', array(
             'user' => $user,
-            'page_title' => $page_title
+            'page_title' => $page_title,
+            'all_trainings' => count($training),
+            'all_mdas' => count($mda),
+            'all_mda_admins' => count($mda_admin),
+            'total_bank_payment' => $bank_pay[0]['pay_amount'],
+            'total_cash_payment' => $cash_pay[0]['cash_pay_amount'],
+            'total_undertaken_payment' => $undertaken_pay[0]['undertaken_pay_amount'],
+            'total_online_payment' => $online_pay[0]['online_pay_amount'],
+            'total_payment' => $total_pay[0]['total_pay_amount'],
+            'total_outstanding_payment' => $ontstanding_pay[0]['out_pay_amount'],
+
         ));
     }
 
@@ -78,6 +133,80 @@ class AdminController extends Controller
             'user' => $user,
             'page_title' => $page_title,
             'mdas' => $result
+        ));
+    }
+
+
+    /**
+     * @Route("/admin/mda/{id}/edit", name="admin_edit_mda")
+     */
+    public function edit_mda(Request $request,$id, UserPasswordEncoderInterface $encoder)
+    {
+        $user = $this->getUser();
+        $page_title = "MDAs";
+
+        $mda = $this->getDoctrine()
+            ->getRepository(Mda::class)
+            ->find($id);
+
+        $form = $this->createFormBuilder($mda)
+            ->add('Name', TextType::class, array(
+                'attr' => array(
+                    'class' => 'form-control mb-3'
+                )
+            ))
+            ->add('Email', EmailType::class, array(
+                'attr' => array(
+                    'class' => 'form-control mb-3'
+                )
+            ))
+            ->add('Address', TextType::class, array(
+                'attr' => array(
+                    'class' => 'form-control mb-3'
+                )
+            ))
+            ->add('Phone', TextType::class, array(
+                'attr' => array(
+                    'class' => 'form-control mb-3',
+                    'onkeypress' => 'return isNumber(event)'
+                )
+            ))
+            ->add('Mda_Code', IntegerType::class, array(
+                'attr' => array(
+                    'class' => 'form-control mb-3',
+                    'onkeypress' => 'return isNumber(event)'
+                )
+            ))
+            ->add('Submit', SubmitType::class, array(
+                'attr' => array(
+                    'class' => 'btn btn-primary btn-block mb-3'
+                )
+            ))
+            ->getForm();
+
+
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid())
+        {
+
+            $mda = $form->getData();
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($mda);
+            $em->flush();
+
+            $this->addFlash('success', 'Mda information updated');
+
+            return $this->redirectToRoute('admin_mda');
+
+        }
+
+
+        return $this->render('admin/add_mda.html.twig', array(
+            'user' => $user,
+            'page_title' => $page_title,
+            'form' => $form->createView()
         ));
     }
 
@@ -134,10 +263,6 @@ class AdminController extends Controller
         {
 
             $mda = $form->getData();
-
-            $mda->setPassword($encoder->encodePassword($mda, $mda->getMdaCode()));
-
-            $mda->setRoles('ROLE_USER');
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($mda);
@@ -616,32 +741,32 @@ class AdminController extends Controller
 
 
         // get bank payments
-        $qu1 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as pay_amount FROM invoice WHERE payment_status='1' AND payment_method='Bank Transfer'");
+        $qu1 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as pay_amount FROM invoice WHERE payment_status='1' AND training_id='$id' AND payment_method='Bank Transfer'");
         $qu1->execute();
         $bank_pay = $qu1->fetchAll();
 
         // get cash payments
-        $qu2 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as cash_pay_amount FROM invoice WHERE payment_status='1' AND payment_method='Cash'");
+        $qu2 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as cash_pay_amount FROM invoice WHERE payment_status='1' AND training_id='$id' AND payment_method='Cash'");
         $qu2->execute();
         $cash_pay = $qu2->fetchAll();
 
         // get undertaken payments
-        $qu3 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as undertaken_pay_amount FROM invoice WHERE payment_status='0' AND payment_method='Undertaken'");
+        $qu3 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as undertaken_pay_amount FROM invoice WHERE payment_status='0' AND training_id='$id' AND payment_method='Undertaken'");
         $qu3->execute();
         $undertaken_pay = $qu3->fetchAll();
 
         // get online payments
-        $qu4 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as online_pay_amount FROM invoice WHERE payment_status='1' AND payment_method='Online'");
+        $qu4 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as online_pay_amount FROM invoice WHERE payment_status='1' AND training_id='$id' AND payment_method='Online'");
         $qu4->execute();
         $online_pay = $qu4->fetchAll();
 
         // get all payments
-        $qu5 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as total_pay_amount FROM invoice WHERE payment_status='1' ");
+        $qu5 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as total_pay_amount FROM invoice WHERE training_id='$id' AND payment_status='1' ");
         $qu5->execute();
         $total_pay = $qu5->fetchAll();
 
         // get outstanding payments
-        $qu6 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as out_pay_amount FROM invoice WHERE payment_status='0'");
+        $qu6 = $em->getConnection()->prepare("SELECT SUM(payment_amount) as out_pay_amount FROM invoice WHERE training_id='$id' AND payment_status='0'");
         $qu6->execute();
         $ontstanding_pay = $qu6->fetchAll();
 
@@ -1178,7 +1303,186 @@ class AdminController extends Controller
 
 
 
+    /**
+     * @Route("/admin/account", name="admin_account")
+     */
+    public function admin_manage_account(Request $request)
+    {
+        $user = $this->getUser();
+        $page_title = "Account";
 
+
+
+        $new_user = new MdaParticipant();
+
+        $new_user->setId($user->getId());
+
+        $form = $this->createFormBuilder($user)
+            ->add('Email', EmailType::class, array(
+                'attr' => array(
+                    'class' => 'form-control mb-3',
+                )
+            ))
+            ->add('Username', TextType::class, array(
+                'attr' => array(
+                    'class' => 'form-control mb-3',
+                )
+            ))
+            ->add('save', SubmitType::class,  array(
+                'label' => 'Update',
+                'attr' => array(
+                    'class' => 'btn btn-block btn-primary mt-4'
+                )))
+            ->getForm();
+
+
+
+        $form->handleRequest($request);
+
+
+
+
+        if($form->isSubmitted() && $form->isValid())
+        {
+
+            $user = $form->getData();
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($user);
+            $em->flush();
+
+            $this->addFlash('success', 'Account details updated');
+
+        }
+
+
+        // replace this line with your own code!
+        return $this->render('admin/account.html.twig', array(
+            'user' => $user,
+            'page_title' => $page_title,
+            'form' => $form->createView()
+
+        ));
+    }
+
+
+    /**
+     * @Route("/admin/account/update/password", name="admin_update_password")
+     */
+    public function admin_update_password(Request $request, UserPasswordEncoderInterface $encoder)
+    {
+        $user = $this->getUser();
+
+
+
+        $current_password = $request->request->get('current_password');
+        $new_password = $request->request->get('new_password');
+        $confirm_password = $request->request->get('confirm_password');
+
+
+
+        if(!empty($current_password))
+        {
+
+            if($new_password == $confirm_password) {
+
+
+                if($encoder->isPasswordValid($user, $current_password) === TRUE)
+                {
+                    $user->setPassword($encoder->encodePassword($user, $new_password));
+
+                    $em = $this->getDoctrine()->getManager();
+                    $em->persist($user);
+                    $em->flush();
+
+                    $this->addFlash('success', 'Password updated');
+
+                }else{
+                    $this->addFlash('error', 'Current password is incorrect');
+                }
+
+
+            }else{
+
+                $this->addFlash('error', 'New passwords do not match');
+
+            }
+
+        }
+
+
+        return $this->redirectToRoute('admin_account');
+
+
+    }
+
+
+    /**
+     * @Route("/admin/users", name="admin_users")
+     */
+    public function admin_users(Request $request, UserPasswordEncoderInterface $encoder)
+    {
+
+        $user = $this->getUser();
+        $page_title = "Admin Users";
+
+        $admin_users = $this->getDoctrine()
+            ->getRepository(User::class)
+            ->findAll();
+
+
+        $user = new User();
+
+        $form = $this->createFormBuilder($user)
+            ->add('Email', EmailType::class, array(
+                'attr' => array(
+                    'class' => 'form-control mb-3'
+                )
+            ))
+            ->add('Username', TextType::class, array(
+                'attr' => array(
+                    'class' => 'form-control mb-3'
+                )
+            ))
+            ->add('Submit', SubmitType::class, array(
+                'attr' => array(
+                    'class' => 'btn btn-success btn-block'
+                )
+            ))
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid())
+        {
+
+            $user = new User();
+
+            $user->setEmail($form["Email"]->getData());
+            $user->setUsername($form["Username"]->getData());
+            $user->setPassword($encoder->encodePassword($user, "0000"));
+
+            $user->setRoles('ROLE_ADMIN');
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($user);
+            $em->flush();
+
+            $this->addFlash('success', 'New admin user added');
+
+            return $this->redirectToRoute('admin_users');
+
+        }
+
+
+        return $this->render('admin/admin_users.html.twig', array(
+            'user' => $user,
+            'page_title' => $page_title,
+            'admin_users' => $admin_users,
+            'form' => $form->createView()
+
+        ));
+    }
 
 
     public function randomString($length = 6) {

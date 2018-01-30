@@ -344,7 +344,10 @@
 
 .pic_background {
   position: relative !Important;
-  background-size: 100% !important; }
+  background-size: 100% !Important; }
+  @media (min-width: 767px) {
+    .pic_background {
+      background-size: 300% !important; } }
 
 .transparent_container {
   position: absolute;
@@ -474,7 +477,7 @@
   .pic_background {
     position: relative;
     background-attachment: scroll !important;
-    background-size: 380% !important;
+    background-size: 280% !important;
     background-position: 50% 10% !important; }
 
   .equal {

@@ -5,7 +5,12 @@
 
 .pic_background {
     position: relative !Important;
-    background-size: 100% !Important
+    background-size: 100% !Important;
+
+    @media(min-width:767px)
+    {
+        background-size: 300% !Important
+    }
 }
 
 .transparent_container {
@@ -92,3 +97,5 @@
 .bg-green {
     background: #3fac5d !important
 }
+
+
