@@ -784,6 +784,44 @@ class AdminController extends Controller
         $ontstanding_pay = $qu6->fetchAll();
 
 
+
+
+        // get mdas that attended the training
+        $st = $em->getConnection()->prepare("SELECT mda_code FROM training_participant WHERE attended='1' AND training_id='$id' GROUP BY mda_code");
+        $st->execute();
+        $attended_mdas = $st->fetchAll();
+
+        // get all mdas
+        $mdas = $this->getDoctrine()
+            ->getRepository(Mda::class)
+            ->findAll();
+
+
+        $not_attended_mdas = array();
+
+        foreach($mdas as $org)
+        {
+
+            foreach($attended_mdas as $real_mda)
+            {
+
+                if($org->getMdaCode() !== $real_mda['mda_code'])
+                {
+
+                    $row3['name'] = $org->getName();
+                    $row3['mda_code'] = $org->getMdaCode();
+                    $row3['email'] = $org->getEmail();
+                    $row3['phone'] = $org->getPhone();
+
+
+                }
+
+            }
+                array_push($not_attended_mdas, $row3);
+        }
+
+
+
         // render to view
         return $this->render('admin/view_training.html.twig', array(
             'user' => $user,
@@ -799,6 +837,7 @@ class AdminController extends Controller
             'total_payment' => $total_pay[0]['total_pay_amount'],
             'total_outstanding_payment' => $ontstanding_pay[0]['out_pay_amount'],
             'training_sessions' => $training_session,
+            'not_attended_mdas' => $not_attended_mdas
         ));
 
     }

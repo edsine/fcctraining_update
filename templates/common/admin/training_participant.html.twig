@@ -8,6 +8,10 @@
                 <a class="nav-link" id="pills-attended-tab" data-toggle="pill" href="#pills-attended" role="tab" aria-controls="pills-profile" aria-selected="false">Participants who attended</a>
             </li>
 
+            <li class="nav-item">
+                <a class="nav-link" id="pills-notregistered-tab" data-toggle="pill" href="#pills-notregistered" role="tab" aria-controls="pills-notregistered" aria-selected="false">MDA's that didn't attend</a>
+            </li>
+
         </ul>
     </div>
 
@@ -121,6 +125,36 @@
 
                                 {% endif %}
                             </td>
+
+                        </tr>
+
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+
+            <div class="tab-pane fade" id="pills-notregistered" role="tabpanel" aria-labelledby="pills-notregistered-tab">
+
+
+                <table id="example" class="datatable table display table-bordered table-striped table-hover" cellspacing="0" width="100%">
+                    <thead >
+                    <tr>
+                        <th>MDA Name</th>
+                        <th>MDA Code</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for mda in not_attended_mdas %}
+                        <tr>
+                            <td>{{ mda.name }}</td>
+                            <td>{{ mda.mda_code }}</td>
+                            <td>{{ mda.email }}</td>
+                            <td>{{ mda.phone }}</td>
+
 
                         </tr>
 
