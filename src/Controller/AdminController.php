@@ -171,6 +171,12 @@ class AdminController extends Controller
                     'onkeypress' => 'return isNumber(event)'
                 )
             ))
+            ->add('TopOfficialDesignation', TextType::class, array(
+                'attr' => array(
+                    'class' => 'form-control mb-3',
+                    'placeholder' => 'Example: The Managing Director'
+                )
+            ))
             ->add('Mda_Code', IntegerType::class, array(
                 'attr' => array(
                     'class' => 'form-control mb-3',
@@ -243,6 +249,12 @@ class AdminController extends Controller
                     'onkeypress' => 'return isNumber(event)'
                 )
             ))
+            ->add('TopOfficialDesignation', TextType::class, array(
+                'attr' => array(
+                    'class' => 'form-control mb-3',
+                    'placeholder' => 'Example: The Managing Director'
+                )
+            ))
             ->add('Mda_Code', IntegerType::class, array(
                 'attr' => array(
                     'class' => 'form-control mb-3',
@@ -264,6 +276,7 @@ class AdminController extends Controller
 
             $mda = $form->getData();
 
+            $mda->setNotAttended("1");
             $em = $this->getDoctrine()->getManager();
             $em->persist($mda);
             $em->flush();
