@@ -873,7 +873,7 @@ SELECT training_participant.training_id FROM training_participant WHERE training
 
         $pay_id = $request->request->get('reference');
 
-        $secret = "sk_live_ffe22323e358e7b4501ab4a269e892a1fc26510f";
+        $secret = "env.paystack";// use paystack key
         $result = array();
         //The parameter after verify/ is the transaction reference to be verified
         $url = "https://api.paystack.co/transaction/verify/$pay_id";
