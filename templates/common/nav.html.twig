@@ -1,6 +1,6 @@
 <header class="fixed-top">
     <div class="bg-dark d-none d-md-block">
-        <div class="container d-sm-flex clearfix font-gray">
+        <div class="container d-sm-flex clearfix font-white">
             <div class="w-50">
                 <i class="fa fa-phone-square font-white"></i> For more information, call 08039717368, 08052374070, 08039475265
             </div>
@@ -11,7 +11,7 @@
     </div>
 <nav class="navbar navbar-expand-md navbar-dark bg-green">
     <div class="container">
-    <a href="/" class="navbar-brand"><img src="{{ asset('assets/images/logo.png') }}" style="max-width: 220px"></a>
+    <a href="{{ path('home') }}" class="navbar-brand"><img src="{{ asset('assets/images/logo.png') }}" style="max-width: 220px"></a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar6">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -26,13 +26,7 @@
                 <a class="nav-link" href="{{ path('home') }}">Home</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#about_training">About the training</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">How to apply</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#"><i class="fa fa-globe"></i> FCC Website</a>
+                <a class="nav-link" href="http://federalcharacter.gov.ng" target="_fcc"><i class="fa fa-globe"></i> FCC Website</a>
             </li>
         </ul>
     </div>

@@ -20,6 +20,15 @@
     "doctrine/dbal": {
         "version": "v2.6.3"
     },
+    "doctrine/deprecations": {
+        "version": "1.1",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "1.0",
+            "ref": "87424683adc81d7dc305eefec1fced883084aab9"
+        }
+    },
     "doctrine/doctrine-bundle": {
         "version": "1.6",
         "recipe": {
@@ -200,9 +209,6 @@
     "symfony/options-resolver": {
         "version": "v4.0.2"
     },
-    "symfony/orm-pack": {
-        "version": "v1.0.5"
-    },
     "symfony/polyfill-intl-icu": {
         "version": "v1.6.0"
     },
@@ -214,9 +220,6 @@
     },
     "symfony/process": {
         "version": "v4.0.3"
-    },
-    "symfony/profiler-pack": {
-        "version": "v1.0.3"
     },
     "symfony/property-access": {
         "version": "v4.0.2"

@@ -16,20 +16,8 @@
 
         <div class="card-body">
 
-
-            <form action="{{ path('user_training_apply', { 'id': training.id }) }}" method="POST">
-
-                <div class="form-group">
-                    <label>Select a session</label>
-                    <select required="required" name="training_session" class="form-control">
-                        <option disabled selected value="">-- Select a session --</option>
-                        {% for session in training_sessions %}
-
-                            <option value="{{ session.id }}">{{ session.name }} - {{ session.startdate|date("d M, Y") }} till {{ session.enddate|date("d M, Y") }}</option>
-
-                        {% endfor %}
-                    </select>
-                </div>
+        {% if training_sessions|length >= 1 %}
+            <form action="{{ path('user_new_training_apply', { 'id': training.id }) }}" method="POST">
 
                 <hr>
 
@@ -54,7 +42,21 @@
                     <label>Participant phone</label>
                     <input type="text" class="form-control" onkeypress="return isNumber(event)" name="participants_phone[]">
                 </div>
+
+                        <div class="form-group">
+                            <label>Select a session</label>
+                            <select required="required" name="participants_session[]" class="form-control">
+                                <option disabled selected value="">-- Select a session --</option>
+                                {% for session in training_sessions %}
+
+                                    <option value="{{ session.id }}">{{ session.name }} - {{ session.startdate|date("d M, Y") }} till {{ session.enddate|date("d M, Y") }}</option>
+
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
+
+
 
                 </div>
 
@@ -64,6 +66,15 @@
 
             </form>
 
+            {% else %}
+
+                <div class="text-center lead p-5">
+            <i class="fa fa-close fa-3x text-danger font-xl-4"></i>
+                    <p> No training session available</p>
+                    <a href="#" onclick="window.history.go(-1); return false;" class="btn btn-primary"><i class="fa fa-chevron-circle-left"></i> Go back</a>
+                </div>
+
+                {% endif %}
         </div>
 
     </div>
@@ -89,4 +100,12 @@
     </div>
 
 
+{% endblock %}
+
+{% block script %}
+    <script>
+    $("#add_participant").click(function () {
+    $("#training_form_participants").append("<div class='bg-gray p-3 mb-3'> <div class='form-group'> <label>Participant name</label> <input type='text' class='form-control' required='required' name='participants[]'> </div> <div class='form-group'> <label>Participant email</label> <input type='email' class='form-control' required='required' name='participants_email[]'> </div> <div class='form-group'> <label>Participant phone</label> <input type='text' class='form-control' onkeypress='return isNumber(event)' name='participants_phone[]'></div>  <div class='form-group'><label>Select a session</label><select required='required' name='participants_session[]' class='form-control'><option disabled selected value=''>-- Select a session --</option>{% for session in training_sessions %}<option value='{{ session.id }}'>{{ session.name }} - {{ session.startdate|date('d M, Y') }} till {{ session.enddate|date('d M, Y') }}</option>{% endfor %}</select> </div></div>");
+    });
+    </script>
 {% endblock %}

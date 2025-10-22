@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\InvoiceRepository")
@@ -26,10 +28,7 @@ class Invoice
      */
     private $payment_amount;
 
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $training_id;
+
 
     /**
      * @ORM\Column(type="string", nullable=true)
@@ -137,21 +136,6 @@ class Invoice
         $this->payment_status = $payment_status;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getTrainingId()
-    {
-        return $this->training_id;
-    }
-
-    /**
-     * @param mixed $training_id
-     */
-    public function setTrainingId($training_id)
-    {
-        $this->training_id = $training_id;
-    }
 
     /**
      * @return mixed
@@ -201,5 +185,56 @@ class Invoice
         $this->payment_evidence = $payment_evidence;
     }
 
+
+
+    /**
+     * @var Training
+     *
+     * @ORM\ManyToOne(targetEntity="App\Entity\Training", inversedBy="invoices")
+     * @ORM\JoinColumn(name="training_id", referencedColumnName="id")
+     */
+    private $training_id;
+
+    /**
+     * @return Training
+     */
+    public function getTrainingId(): Training
+    {
+        return $this->training_id;
+    }
+
+    /**
+     * @param Training $training_id
+     */
+    public function setTrainingId(Training $training_id)
+    {
+        $this->training_id = $training_id;
+    }
+
+
+
+
+
+
+
+    public function __construct()
+    {
+        $this->invoice_log = new ArrayCollection();
+
+    }
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\InvoiceLog", mappedBy="invoice_id")
+     */
+    private $invoice_log;
+
+
+    /**
+     * @return Collection|InvoiceLog[]
+     */
+    public function getInvoiceLog()
+    {
+        return $this->invoice_log;
+    }
 
 }

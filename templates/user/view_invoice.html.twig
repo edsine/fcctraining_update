@@ -2,18 +2,55 @@
 
 {% block body %}
 
+    {% if invoice.paymentevidence == NULL %}
+        <div class="card">
+
+            <div class="card-header bg-red font-white">
+                <h4>Upload payment evidence</h4>
+            </div>
+
+            <div class="card-body">
+
+                {{ form_start(form) }}
+                {{ form_widget(form) }}
+                {{ form_end(form) }}
+
+            </div>
+
+        </div>
+    {% else %}
+
+        <div class="card">
+
+            <div class="card-header bg-success font-white">
+                <button class="btn float-right btn-xs btn-primary btn-xs mr-2" onclick="printElem2('pay_evidence');"><i class="fa fa-print"></i> Print</button>
+                <h4>Payment evidence</h4>
+            </div>
+
+            <div class="card-body" id="pay_evidence">
+
+                <img src="{{ asset(invoice.paymentevidence) }}" class="img-fluid">
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+
     <div class="card">
         <div class="card-header bg-dark font-white">
             <div class="float-right d-flex">
                 <button class="btn btn-primary btn-xs mr-2" onclick="printElem('letter');"><i class="fa fa-print"></i> Print</button>
 
+    {% if invoice.paymentevidence == NULL %}
     {% if invoice.paymentstatus == 0 %}
                 <form action="{{ path('verify_invoice_online_payment', { 'id':invoice.id }) }}" method="POST" class="bottom_buffer">
 
                     <button class='btn btn-info btn-xs' id="paystack_pay">Pay Online</button>
                     <script
                             src="https://js.paystack.co/v1/inline.js"
-                            data-key="pk_test_9528a39de97e7f84ca32a32e9859df0f18c72e52"
+                            data-key="pk_live_23b02ce39ed67434180d01a95154d6411e9fa4ee"
                             data-email="{{ user.email }}"
                             data-amount="{{ invoice.paymentamount }}00"
                             data-ref="{{ payment_id }}"
@@ -22,6 +59,7 @@
                     </script>
                 </form>
         {% endif %}
+    {% endif %}
 
             </div>
             Invoice
@@ -191,6 +229,8 @@
             <div class="col-8">Zenith Bank</div>
 
         </div>
+
+        <p class="mt-3">After making payment, scan a copy of the reciept, attach and send as mail to payment@pglnigeria.com stating your MDA name and invoice no.</p>
 
         <img src="{{ asset('assets/images/pay_logo.png') }}" class="img-fluid mt-4 w-75">
 

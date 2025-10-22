@@ -39,7 +39,8 @@
                       {% for user in admin_users %}
 
                           <li class="list-group-item">
-                              <a href="" class="btn btn-xs btn-danger float-right"><i class="fa fa-close"></i> Delete User</a>
+                              <a href="{{ path('admin_delete_user', { 'id':user.id }) }}" class="btn btn-xs btn-danger float-right"><i class="fa fa-close"></i> Delete User</a>
+                              <a href="{{ path('admin_edit_user', { 'id':user.id }) }}" class="btn btn-xs btn-warning float-right"><i class="fa fa-pencil"></i> Edit User</a>
                               <h4>{{ user.username }}</h4>
                               <p class="font-xs font-gray">{{ user.email }}</p>
                           </li>

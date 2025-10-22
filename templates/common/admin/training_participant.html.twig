@@ -69,9 +69,19 @@
 
                                 {% if participant.payment_status == 0 %}
 
-                                    <a href="{{ path('user_view_invoice', { 'id':participant.invoice_id }) }}" class="btn btn-primary btn-xs"><i class="fa fa-file-o"></i> View invoice</a>
+                                    <a href="{{ path('admin_view_invoice', { 'id':participant.invoice_id }) }}" class="btn btn-primary btn-xs"><i class="fa fa-file-o"></i> View invoice</a>
 
                                 {% endif %}
+
+                                <a href="{{ path('admin_edit_participant', {'id':participant.id, 'training_id':training.id}) }}" class="btn btn-warning btn-xs mt-2"><i class="fa fa-pencil"></i></a>
+                                <a href="{{ path('admin_delete_participant', {'id':participant.id}) }}" class="btn btn-danger btn-xs mt-2"><i class="fa fa-close"></i></a>
+
+                                {% if participant.attended == 0 %}
+                                <a href="{{ path('admin_mark_participant_attended', {'id':participant.id}) }}" class="btn btn-success btn-xs mt-2">Mark as attended</a>
+                                {% else %}
+                                    <a href="{{ path('admin_mark_participant_not_attended', {'id':participant.id}) }}" class="btn btn-danger btn-xs mt-2">Mark as not attended</a>
+                                {% endif %}
+
                             </td>
                         </tr>
 

@@ -15,6 +15,7 @@
                     <th>Invoice ID</th>
                     <th>Payment ID</th>
                     <th>MDA</th>
+                    <th>Training</th>
                     <th>Payment amount</th>
                     <th>Payment method</th>
                     <th>Payment status</th>
@@ -29,6 +30,7 @@
                         <td>#{{ invoice.id }}</td>
                         <td>{{ invoice.paymentid }}</td>
                         <td>{{ invoice.mda }}</td>
+                        <td>{{ invoice.training.title }}</td>
                         <td>&#8358;{{ invoice.paymentamount|number_format }}</td>
                         <td>{{ invoice.paymentmethod }}</td>
                         <td>

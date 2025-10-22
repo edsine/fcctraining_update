@@ -4,11 +4,12 @@ namespace App\Repository;
 
 use App\Entity\Financials;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Persistence\ManagerRegistry; // updated namespace for DoctrineBundle 2.0 and later
 
 class FinancialsRepository extends ServiceEntityRepository
 {
-    public function __construct(RegistryInterface $registry)
+    //public function __construct(RegistryInterface $registry)
+    public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Financials::class);
     }
@@ -26,3 +27,4 @@ class FinancialsRepository extends ServiceEntityRepository
     }
     */
 }
+

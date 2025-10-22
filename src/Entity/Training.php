@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\TrainingRepository")
@@ -52,6 +54,11 @@ class Training
     private $individual_amount;
 
     /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $refresher_individual_amount;
+
+    /**
      * @ORM\Column(type="integer")
      */
     private $extra_personnel_amount;
@@ -62,9 +69,19 @@ class Training
     private $individuals_per_mda;
 
     /**
+     * @ORM\Column(type="integer")
+     */
+    private $parent_id;
+
+    /**
      * @ORM\Column(type="text")
      */
     private $letter_content;
+
+    /**
+     * @ORM\Column(type="text")
+     */
+    private $refresher_letter_content;
 
     /**
      * @return mixed
@@ -229,6 +246,22 @@ class Training
     /**
      * @return mixed
      */
+    public function getRefresherLetterContent()
+    {
+        return $this->refresher_letter_content;
+    }
+
+    /**
+     * @param mixed $refresher_letter_content
+     */
+    public function setRefresherLetterContent($refresher_letter_content)
+    {
+        $this->refresher_letter_content = $refresher_letter_content;
+    }
+
+    /**
+     * @return mixed
+     */
     public function getTrainingCode()
     {
         return $this->training_code;
@@ -244,8 +277,73 @@ class Training
 
 
 
+    public function __construct()
+    {
+        $this->participants_allowed = new ArrayCollection();
+        $this->invoices = new ArrayCollection();
 
 
+    }
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\ParticipantsAllowed", mappedBy="training_id")
+     */
+    private $participants_allowed;
+
+
+    /**
+     * @return Collection|ParticipantsAllowed[]
+     */
+    public function getParticipantsAllowed()
+    {
+        return $this->participants_allowed;
+    }
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Invoice", mappedBy="training_id")
+     */
+    private $invoices;
+
+
+    /**
+     * @return Collection|Invoice[]
+     */
+    public function getInvoices()
+    {
+        return $this->invoices;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getParentId()
+    {
+        return $this->parent_id;
+    }
+
+    /**
+     * @param mixed $parent_id
+     */
+    public function setParentId($parent_id)
+    {
+        $this->parent_id = $parent_id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRefresherIndividualAmount()
+    {
+        return $this->refresher_individual_amount;
+    }
+
+    /**
+     * @param mixed $refresher_individual_amount
+     */
+    public function setRefresherIndividualAmount($refresher_individual_amount)
+    {
+        $this->refresher_individual_amount = $refresher_individual_amount;
+    }
 
 
 }

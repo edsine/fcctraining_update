@@ -36,7 +36,7 @@
                             <td>{{ session.name }}</td>
                             <td>{{ session.startdate|date("l, F j Y") }}</td>
                             <td>{{ session.enddate|date("l, F j Y") }}</td>
-                            <td>{{ session.capacity|number_format }}</td>
+                            <td>{{ session.registered|number_format }}/{{ session.capacity|number_format }}</td>
                             <td>
 
                                 {% if session.status == 0 %}
@@ -60,10 +60,11 @@
                                 <a href="{{ path('admin_training_session', { 'id':session.id }) }}" class="btn btn-xs btn-primary mb-1"><i class="fa fa-users"></i> View participants</a>
                                 {% if session.status == '1' %}
                                 <a href="{{ path('admin_close_training_session', { 'id' : session.id }) }}" class="btn btn-danger btn-xs"><i class="fa fa-exclamation-circle"></i> Close registration</a>
+                                    <a href="{{ path('admin_edit_training_session', { 'id' : session.id }) }}" class="btn btn-warning btn-xs"><i class="fa fa-pencil"></i> Edit</a>
                                 {% elseif (session.status == '0') or (session.status == 2) %}
                                     <a href="{{ path('admin_open_training_session', { 'id' : session.id }) }}" class="btn btn-success btn-xs"><i class="fa fa-check-circle"></i> Open registration</a>
                                 {% endif %}
-                                <a href="{{ path('admin_close_training_session', { 'id' : session.id }) }}" class="btn btn-danger btn-xs"><i class="fa fa-close"></i> Delete session</a>
+                                <a href="{{ path('admin_delete_training_session', { 'id' : session.id }) }}" class="btn btn-danger btn-xs"><i class="fa fa-close"></i> Delete session</a>
                             </td>
                         </tr>
 

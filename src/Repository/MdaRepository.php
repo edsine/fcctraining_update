@@ -4,13 +4,13 @@ namespace App\Repository;
 
 use App\Entity\Mda;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
 
 
 class MdaRepository extends ServiceEntityRepository implements UserLoaderInterface
 {
-    public function __construct(RegistryInterface $registry)
+    public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Mda::class);
     }
@@ -39,3 +39,4 @@ class MdaRepository extends ServiceEntityRepository implements UserLoaderInterfa
     }
     */
 }
+

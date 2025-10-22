@@ -63,6 +63,7 @@
                              <th>Phone</th>
                              <th>Session</th>
                              <th>Attended</th>
+                             <th>Reg. Date</th>
                              <th>Payment status</th>
                              <th>Invoice</th>
                              <th>Options</th>
@@ -85,6 +86,7 @@
 
                                   {% endif %}
                                  </td>
+                                 <td>{{ participant.date|date('jS F, Y') }}</td>
                                  <td>
                                      {% if participant.payment_status == 0 %}
 

@@ -5,11 +5,14 @@ namespace App\Controller;
 use App\Entity\Invoice;
 use App\Entity\Mda;
 use App\Entity\MdaParticipant;
+use App\Entity\ParticipantsAllowed;
 use App\Entity\Training;
 use App\Entity\TrainingParticipant;
 use App\Entity\TrainingSession;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Config\Definition\Exception\Exception;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -202,10 +205,49 @@ SELECT training_participant.training_id FROM training_participant WHERE training
 
 
 
+
     /**
      * @Route("/user/training/{id}/apply", name="user_training_apply")
      */
     public function user_apply_training(Request $request, $id)
+    {
+        $user = $this->getUser();
+        $page_title = "Training";
+
+        $training = $this->getDoctrine()->getRepository(Training::class)->find($id);
+
+        if($training->getParentId() == NULL || $training->getParentId() == 0)
+        {
+            return $this->redirectToRoute('user_new_training_apply', [ 'id' => $training->getId() ]);
+
+        }else {
+
+            $previous_attendees = $this->getDoctrine()
+                ->getRepository(TrainingParticipant::class)
+                ->findBy([
+                    'training_id' => $training->getParentId(),
+                    'mda_code' => $user->getMdaCode(),
+                    'attended' => 1
+                ]);
+
+            if(!empty($previous_attendees))
+            {
+            return $this->render('user/training_application.html.twig', array('user' => $user, 'page_title' => $page_title, 'training' => $training));
+            }else {
+                return $this->redirectToRoute('user_new_training_apply', ['id' => $training->getId()]);
+            }
+
+
+
+        }
+    }
+
+
+
+    /**
+     * @Route("/user/training/{id}/new/apply", name="user_new_training_apply")
+     */
+    public function user_apply_new_training(Request $request, $id)
     {
         $user = $this->getUser();
         $page_title = "Training";
@@ -224,127 +266,187 @@ SELECT training_participant.training_id FROM training_participant WHERE training
             ]);
 
 
+        $mda = $this->getDoctrine()
+            ->getRepository(Mda::class)
+            ->findOneBy([
+               'mda_code' => $user->getMdaCode()
+            ]);
 
-
-        $form_session = $request->request->get('training_session');
+//        $form_session = $request->request->get('training_session');
         $form_participants = $request->request->get('participants');
         $form_participants_email = $request->request->get('participants_email');
         $form_participants_phone = $request->request->get('participants_phone');
+        $form_participants_session = $request->request->get('participants_session');
 
-        if(!empty($form_session))
+
+        if(!empty($form_participants_session))
         {
             $em = $this->getDoctrine()->getManager();
 
-
-            //generate invoice for the MDA
-            $invoice = new Invoice();
-
-            $invoice->setPaymentStatus("0");
-            $invoice->setMdaCode($user->getMdaCode());
-            $invoice->setTrainingId($training->getId());
+            try {
 
 
-            $mda_code = $user->getMdaCode();
-            $query4 = $em->getConnection()->prepare("SELECT * FROM invoice WHERE training_id='$id' AND mda_code='$mda_code' AND initial_invoice='1'");
-            $query4->execute();
-            $initial_invoice = count($query4->fetchAll());
+                if (count($form_participants) < $training->getIndividualsPerMda()) {
+
+                    $participants_allowed = $this->getDoctrine()
+                        ->getRepository(ParticipantsAllowed::class)
+                        ->findOneBy([
+                            'training_id' => $training,
+                            'mda_id' => $mda
+                        ]);
+
+                    if(count($participants_allowed) >= 1)
+                    {
+
+                        if (count($form_participants) != $participants_allowed->getAllowedParticipants()) {
+                            throw new Exception("You must register at least ".$participants_allowed->getAllowedParticipants()." participants");
+                        }
+
+                    }else {
+                        throw new Exception("You must register at least 2 participants");
+                    }
+                }
+
+                $all_participants = count($form_participants);
+
+                $count = 0;
+
+                for ($i = 0; $i < $all_participants; $i++) {
+                    if (!empty($form_participants[$i])) {
+
+                        $email = $form_participants_email[$i];
+                        $check_p = $this->getDoctrine()
+                            ->getRepository(TrainingParticipant::class)
+                            ->findBy([
+                               'participant_email' => $email
+                            ]);
+
+                        if(!empty($check_p))
+                        {
+                            $count += 1;
+                        }
+
+                    }
+                }
+
+                if($count == 0)
+                {
+                        //generate invoice for the MDA
+                $invoice = new Invoice();
+
+                $invoice->setPaymentStatus("0");
+                $invoice->setMdaCode($user->getMdaCode());
+                $invoice->setTrainingId($training);
 
 
-            if($initial_invoice >= '1')
-            {
-                $invoice->setInitialInvoice("0");
-            }else{
-                $invoice->setInitialInvoice("1");
-            }
-
-            // calculate invoice charge based on number of participants
-            $all_participants = count($form_participants);
+                $mda_code = $user->getMdaCode();
+                $query4 = $em->getConnection()->prepare("SELECT * FROM invoice WHERE training_id='$id' AND mda_code='$mda_code' AND initial_invoice='1'");
+                $query4->execute();
+                $initial_invoice = count($query4->fetchAll());
 
 
+                if ($initial_invoice >= '1') {
+                    $invoice->setInitialInvoice("0");
+                } else {
+                    $invoice->setInitialInvoice("1");
+                }
 
-            if($all_participants > $training->getIndividualsPerMda())
-            {
-                $main_partcipants = $training->getIndividualsPerMda();
-                $extra_partcipants = $all_participants - $training->getIndividualsPerMda();
-            }else{
-                $main_partcipants = $all_participants;
-                $extra_partcipants = 0;
-            }
+                // calculate invoice charge based on number of participants
 
 
-            if($initial_invoice === 0 ) {
 
-                $main_partcipants_charge = $main_partcipants * $training->getIndividualAmount();
-
-                $extra_partcipants_charge = $extra_partcipants * $training->getExtraPersonnelAmount();
-
-                $total_charge = $training->getRegistrationFee() + $main_partcipants_charge + $extra_partcipants_charge;
-
-                $invoice->setPaymentAmount($total_charge);
-
-            }elseif($initial_invoice >= 1){
-
-                $total_charge = $all_participants * $training->getExtraPersonnelAmount();
+                if ($all_participants > $training->getIndividualsPerMda()) {
+                    $main_partcipants = $training->getIndividualsPerMda();
+                    $extra_partcipants = $all_participants - $training->getIndividualsPerMda();
+                } else {
+                    $main_partcipants = $all_participants;
+                    $extra_partcipants = 0;
+                }
 
 
-                $invoice->setPaymentAmount($total_charge);
+                if ($initial_invoice === 0) {
 
-            }
+                    $main_partcipants_charge = $main_partcipants * $training->getIndividualAmount();
 
-            $em->persist($invoice);
-            $em->flush();
+                    $extra_partcipants_charge = $extra_partcipants * $training->getExtraPersonnelAmount();
 
+                    $total_charge = $training->getRegistrationFee() + $main_partcipants_charge + $extra_partcipants_charge;
 
-            for($i=0; $i < $all_participants; $i++)
-            {
-                if(!empty($form_participants[$i])) {
-                // save training participants
-                $session = new TrainingParticipant();
+                    $invoice->setPaymentAmount($total_charge);
 
-                $session->setTrainingId($training->getId());
-                $session->setMdaCode($user->getMdaCode());
-                $session->setParticipantName($form_participants[$i]);
-                $session->setParticipantPhone($form_participants_phone[$i]);
-                $session->setParticipantEmail($form_participants_email[$i]);
-                $session->setSessionId($form_session);
-                $session->setAttended("0");
-                $session->setInvoiceId($invoice->getId());
+                } elseif ($initial_invoice >= 1) {
+
+                    $total_charge = $all_participants * $training->getExtraPersonnelAmount();
 
 
-                $em->persist($session);
-                $em->flush();
+                    $invoice->setPaymentAmount($total_charge);
 
                 }
 
-            }
-
-
-            // check if training session is full
-            $training_id = $training->getId();
-
-            $qu = $em->getConnection()->prepare("SELECT * FROM training_participant WHERE training_id='$training_id' AND session_id='$form_session'");
-            $qu->execute();
-            $stt = $qu->fetchAll();
-
-            $t_session = $this->getDoctrine()
-                ->getRepository(TrainingSession::class)
-                ->find($form_session);
-
-            if(count($stt) >= $t_session->getCapacity())
-            {
-
-                $t_session->setStatus('2');
-
-                $em->persist($t_session);
+                $em->persist($invoice);
                 $em->flush();
 
+
+                for ($i = 0; $i < $all_participants; $i++) {
+                    if (!empty($form_participants[$i])) {
+                        // save training participants
+                        $session = new TrainingParticipant();
+
+                        $session->setTrainingId($training->getId());
+                        $session->setMdaCode($user->getMdaCode());
+                        $session->setParticipantName($form_participants[$i]);
+                        $session->setParticipantPhone($form_participants_phone[$i]);
+                        $session->setParticipantEmail($form_participants_email[$i]);
+                        $session->setSessionId($form_participants_session[$i]);
+                        $session->setDate(new \DateTime('now'));
+                        $session->setAttended("0");
+                        $session->setInvoiceId($invoice->getId());
+
+
+                        $em->persist($session);
+                        $em->flush();
+
+
+                        // check if training session is full
+                        $training_id = $training->getId();
+
+                        $form_session = $form_participants_session[$i];
+                        $qu = $em->getConnection()->prepare("SELECT * FROM training_participant WHERE training_id='$training_id' AND session_id='$form_session'");
+                        $qu->execute();
+                        $stt = $qu->fetchAll();
+
+                        $t_session = $this->getDoctrine()->getRepository(TrainingSession::class)->find($form_session);
+
+                        if (count($stt) >= $t_session->getCapacity()) {
+
+                            $t_session->setStatus('2');
+
+                            $em->persist($t_session);
+                            $em->flush();
+
+                        }
+                    }
+
+                }
+
+
+
+                $this->addFlash('success', "Training registration completed");
+
+                return $this->redirectToRoute('user_view_training', array('id' => $training_id));
+
+
+                    }else{
+                    throw new Exception("Participant(s) email already exists");
+                }
+
+            }catch(Exception $e)
+            {
+                $errormessage = $e->getMessage();
+
+                $this->addFlash('error', $errormessage);
+
             }
-
-
-                return $this->redirectToRoute('user_view_training', array(
-                    'id' => $training_id
-                ));
-
 
         }
 
@@ -354,6 +456,164 @@ SELECT training_participant.training_id FROM training_participant WHERE training
             'page_title' => $page_title,
             'training' => $training,
             'training_sessions' => $training_session
+        ));
+    }
+
+
+    /**
+     * @Route("/user/training/{id}/refresher/apply", name="user_refresher_training_apply")
+     */
+    public function user_apply_refresher_training(Request $request, $id)
+    {
+        $user = $this->getUser();
+        $page_title = "Training";
+
+        $training = $this->getDoctrine()
+            ->getRepository(Training::class)
+            ->find($id);
+
+
+
+        $training_session = $this->getDoctrine()
+            ->getRepository(TrainingSession::class)
+            ->findBy([
+                'training_id' => $id,
+                'status' => '1'
+            ]);
+
+
+        $mda = $this->getDoctrine()
+            ->getRepository(Mda::class)
+            ->findOneBy([
+                'mda_code' => $user->getMdaCode()
+            ]);
+
+        $previous_attendees = $this->getDoctrine()
+            ->getRepository(TrainingParticipant::class)
+            ->findBy([
+                'training_id' => $training->getParentId(),
+                'mda_code' => $user->getMdaCode(),
+                'attended' => 1
+            ]);
+
+        $form_session = $request->request->get('training_session');
+        $form_participants = $request->request->get('participants');
+        $form_participants_email = $request->request->get('participants_email');
+        $form_participants_phone = $request->request->get('participants_phone');
+
+
+
+        if(!empty($form_session))
+        {
+            $em = $this->getDoctrine()->getManager();
+
+            try {
+
+
+                if(count($form_participants) >= 1) {
+
+                    //generate invoice for the MDA
+                    $invoice = new Invoice();
+
+                    $invoice->setPaymentStatus("0");
+                    $invoice->setMdaCode($user->getMdaCode());
+                    $invoice->setTrainingId($training);
+
+
+                    $mda_code = $user->getMdaCode();
+                    $query4 = $em->getConnection()->prepare("SELECT * FROM invoice WHERE training_id='$id' AND mda_code='$mda_code' AND initial_invoice='1'");
+                    $query4->execute();
+                    $initial_invoice = count($query4->fetchAll());
+
+
+                    $invoice->setInitialInvoice("0");
+
+
+                    // calculate invoice charge based on number of participants
+                    $all_participants = count($form_participants);
+
+
+                    if ($initial_invoice === 0) {
+
+                        $refresher_partcipants_charge = count($form_participants) * $training->getRefresherindividualAmount();
+
+                        $total_charge = $refresher_partcipants_charge;
+
+                        $invoice->setPaymentAmount($total_charge);
+
+                    }
+
+                    $em->persist($invoice);
+                    $em->flush();
+
+
+                    for ($i = 0; $i < $all_participants; $i++) {
+                        if (!empty($form_participants[$i])) {
+                            // save training participants
+                            $session = new TrainingParticipant();
+
+                            $session->setTrainingId($training->getId());
+                            $session->setMdaCode($user->getMdaCode());
+                            $session->setParticipantName($form_participants[$i]);
+                            $session->setParticipantPhone($form_participants_phone[$i]);
+                            $session->setParticipantEmail($form_participants_email[$i]);
+                            $session->setSessionId($form_session);
+                            $session->setAttended("0");
+                            $session->setInvoiceId($invoice->getId());
+                            $session->setDate(new \DateTime('now'));
+
+                            $em->persist($session);
+                            $em->flush();
+
+                        }
+
+                    }
+
+
+                    // check if training session is full
+                    $training_id = $training->getId();
+
+                    $qu = $em->getConnection()->prepare("SELECT * FROM training_participant WHERE training_id='$training_id' AND session_id='$form_session'");
+                    $qu->execute();
+                    $stt = $qu->fetchAll();
+
+                    $t_session = $this->getDoctrine()->getRepository(TrainingSession::class)->find($form_session);
+
+                    if (count($stt) >= $t_session->getCapacity()) {
+
+                        $t_session->setStatus('2');
+
+                        $em->persist($t_session);
+                        $em->flush();
+
+                    }
+                    $this->addFlash('success', "Training registration completed");
+
+                    return $this->redirectToRoute('user_view_training', array('id' => $training_id));
+
+                }else{
+                    throw new Exception("You must submit at least one participant that have attended the previous training");
+                }
+
+            }catch(Exception $e)
+            {
+                $errormessage = $e->getMessage();
+
+                $this->addFlash('error', $errormessage);
+
+            }
+
+
+
+        }
+
+
+        return $this->render('user/refresher_apply_training.html.twig', array(
+            'user' => $user,
+            'page_title' => $page_title,
+            'training' => $training,
+            'training_sessions' => $training_session,
+            'previous_attendees' => $previous_attendees
         ));
     }
 
@@ -413,6 +673,7 @@ SELECT training_participant.training_id FROM training_participant WHERE training
             $row['phone'] = $participant->getParticipantPhone();
             $row['session'] = $training_session->getName();
             $row['attended'] = $participant->getAttended();
+            $row['date'] = $participant->getDate();
             $row['payment_status'] = $iv->getPaymentStatus();
             $row['invoice_id'] = $iv->getId();
 
@@ -459,7 +720,7 @@ SELECT training_participant.training_id FROM training_participant WHERE training
     /**
      * @Route("/user/invoice/{id}", name="user_view_invoice")
      */
-    public function generate_invoice($id)
+    public function generate_invoice($id, Request $request)
     {
         $user = $this->getUser();
         $page_title = "Invoice";
@@ -513,6 +774,78 @@ SELECT training_participant.training_id FROM training_participant WHERE training
         $participants_count = $query->fetchAll();
 
 
+
+
+
+        $form = $this->createFormBuilder()
+            ->add('PaymentEvidence', FileType::class, array(
+                'attr' => array(
+                    'class' => 'custom-input form-control mb-3'
+                )
+            ))
+            ->add('Upload', SubmitType::class, array(
+                'attr' => array(
+                    'class' => 'btn btn-primary'
+                )
+            ))
+            ->getForm();
+
+
+        $form->handleRequest($request);
+
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $data = $form->getData();
+
+
+            //upload directory
+            $dir = '../public/payment_evidence/';
+
+            //generate random file name
+            $new_filename = strtotime("now");
+
+            // get file size
+            $size = $data['PaymentEvidence']->getSize();
+
+            // validate file size
+            if($size < 1900000)
+            {
+
+                $type = $data['PaymentEvidence']->getMimeType();
+
+                $accepted_file_types = array("image/png", "image/jpg", "image/jpeg", "application/pdf");
+
+                if (in_array($type, $accepted_file_types)) {
+
+                    $extension = $data['PaymentEvidence']->guessExtension();
+
+                    $data['PaymentEvidence']->move($dir, "$new_filename.$extension");
+
+                    $invoice->setPaymentevidence("payment_evidence/"."$new_filename.$extension");
+
+                    $em->persist($invoice);
+                    $em->flush();
+
+                    $this->addFlash('success', 'Payment evidence uploded');
+
+                }else{
+
+                    $this->addFlash('error', "$type File type not supported");
+                }
+
+
+            }else{
+
+                $this->addFlash('error', 'File size is higher than 1.9MB');
+
+            }
+
+            return $this->redirectToRoute('user_view_invoice', [ 'id' => $id ]);
+
+        }
+
+
         // replace this line with your own code!
         return $this->render('user/view_invoice.html.twig', array(
             'user' => $user,
@@ -521,12 +854,14 @@ SELECT training_participant.training_id FROM training_participant WHERE training
             'all_main_participants' => $d_participants,
             'all_extra_participants' => $d_extra_participants,
             'mda' => $mda,
+            'form' => $form->createView(),
             'training' => $training,
             'payment_id' => $this->randomString(9),
             'participants_count' => count($participants_count),
             'date' => date('l, F j Y', strtotime(date('Y-m-d')))
         ));
     }
+
 
     /**
      * @Route("/user/invoice/{id}/payment/verify/online", name="verify_invoice_online_payment")
@@ -538,9 +873,9 @@ SELECT training_participant.training_id FROM training_participant WHERE training
 
         $pay_id = $request->request->get('reference');
 
-        $secret = "sk_test_7e5cf417ea28b280919241b1c619eab1a3d0c5ed";
+        $secret = "sk_live_ffe22323e358e7b4501ab4a269e892a1fc26510f";
         $result = array();
-//The parameter after verify/ is the transaction reference to be verified
+        //The parameter after verify/ is the transaction reference to be verified
         $url = "https://api.paystack.co/transaction/verify/$pay_id";
 
         $ch = curl_init();
@@ -713,6 +1048,7 @@ return $this->redirectToRoute('user_account');
     }
 
 
+
     public function randomString($length = 6) {
     $str = "";
     $characters = array_merge(range('A','X'), range('a','z'), range('0','9'));
@@ -721,6 +1057,8 @@ return $this->redirectToRoute('user_account');
         $rand = mt_rand(0, $max);
         $str .= $characters[$rand];
     }
-return $str;
-}
+    return $str;
+    }
+
+
 }

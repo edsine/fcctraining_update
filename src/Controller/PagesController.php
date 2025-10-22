@@ -3,7 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Mda;
+use App\Entity\MdaParticipant;
 use App\Entity\Training;
+use App\Entity\TrainingSession;
+use App\Model\VisitorLog;
 use Knp\Bundle\SnappyBundle\KnpSnappyBundle;
 use Knp\Snappy\Pdf;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -11,6 +14,7 @@ use Knp\Bundle\SnappyBundle\Snappy\Response\PdfResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class PagesController extends Controller
 {
@@ -19,7 +23,7 @@ class PagesController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function index()
+    public function index(Request $request, VisitorLog $visitorLog, SessionInterface $session)
     {
 
         $mda = $this->getDoctrine()
@@ -27,114 +31,89 @@ class PagesController extends Controller
             ->findAll();
 
 
+        $ipaddress = $request->getClientIp();
+
+        $visitorLog->logVisit($ipaddress);
+
+        $mda_code = $request->request->get('mda_code');
 
 
-       /* foreach($mda as $govt_mda)
+        if(!empty($mda_code))
         {
-            $mda1_name = trim($govt_mda->getName());
 
-            echo "<hr> <h4>$mda1_name</h4>";
-
-            $strings = explode(" ", $mda1_name);
-
-            foreach($strings as $string) {
-
-                $string = trim($string);
-
-                $key =  array_search($string, $strings);
+            $em = $this->getDoctrine()->getManager();
+            $qu = $em->getConnection()->prepare("SELECT * FROM mda WHERE mda_code='$mda_code'");
+            $qu->execute();
+            $statement = count($qu->fetchAll());
 
 
-                echo"------ <br> <b>$string</b> <br>";
-
-                $query = "SELECT * FROM access_mda WHERE mda LIKE '%$string%' ";
-
-                $em = $this->getDoctrine()->getManager();
-                $statement = $em->getConnection()->prepare($query);
-                $statement->execute();
-                $qu = $statement->fetchAll();
-
-                foreach ($qu as $old_mda) {
-
-                    $mda2_name = $old_mda['mda'];
+            if($statement >= 1)
+            {
 
 
-                    $designation = $old_mda['designation'];
-
-                    if (strstr($mda2_name, $string)) {
-                        //$govt_mda->setTopOfficialDesignation($old_mda['designation']);
-                        //$em->persist($govt_mda);
-                        //$em->flush();
-
-                        //echo "[FOUND:] $mda2_name <br>";
-
-                        $total = count($strings);
-                        $medium = $total/2;
-                        $score = 0;
-                        $long_text = "";
-
-                        $i = 0;
-                        foreach($strings as $st)
-                        {
-                            $st = trim($st);
-                            if($i >= $key) {
-                                $long_text .= $st . " ";
-
-
-                                if (strstr($mda2_name, $long_text)) {
-                                    $score += 1;
-                                }
-                                //echo $long_text." - $score<br>";
-                            }
-
-                            //echo $long_text." - $score <br>";
-                            $i++;
-                        }
-
-                        if($score >= $medium) {
-
-                            echo("- $mda2_name - $designation ($score/$total)<br>");
-                        }
-                    }
-
-                }
+                return $this->redirectToRoute('generate_letter_step_2', array(
+                    'mda' => $mda_code
+                ));
 
             }
+
+
+
+
         }
-*/
+
+
+
+        $training_sessions = $this->getDoctrine()
+            ->getRepository(TrainingSession::class)
+            ->findBy([
+               'status' => 1
+            ]);
+
 
 
 
         return $this->render('pages/home.html.twig', array(
             "mdas" => $mda,
+            "training_session" => $training_sessions,
+            "visitor_metrics" => $visitorLog->todayVisits()
 
         ));
     }
 
 
     /**
-     * @Route("/generate/letter", name="generate_letter_step_2")
+     * @Route("/generate/letter/{mda}", name="generate_letter_step_2")
      */
-    public function generate_letter(Request $request)
+    public function generate_letter($mda, VisitorLog $visitorLog, Request $request)
     {
 
-        $mda = $request->request->get('mda');
-        $phone = $request->request->get('phone');
-        $email = $request->request->get('email');
+        $d_mda = $this->getDoctrine()
+            ->getRepository(mda::class)
+            ->findOneBy([
+                'mda_code' => $mda
+            ]);
+
+        $ipaddress = $request->getClientIp();
+
+        $visitorLog->logVisit($ipaddress);
 
         if(!empty($mda)) {
+
 
             $training = $this->getDoctrine()
                 ->getRepository(Training::class)
                 ->findAll();
 
             return $this->render('pages/generate_letter.html.twig', array(
-                'mda' => $mda,
-                'email' => $email,
-                'phone' => $phone,
-                'trainings' => $training
+                'mda' => $d_mda->getName(),
+                'trainings' => $training,
+                'visitor_metrics' => $visitorLog->todayVisits()
             ));
 
         }else{
+            $this->addFlash('error', 'MDA code does not exist');
+
             return $this->redirectToRoute('home');
         }
 
@@ -146,7 +125,7 @@ class PagesController extends Controller
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
      */
-    public function print_mda_letter(Request $request,$id = NULL, \Swift_Mailer $mailer)
+    public function print_mda_letter(Request $request, VisitorLog $visitorLog, $id = NULL, \Swift_Mailer $mailer)
     {
 
         $all_mda = $this->getDoctrine()
@@ -154,6 +133,10 @@ class PagesController extends Controller
             ->findBy([
                 'not_attended' => 1
             ]);
+
+        $ipaddress = $request->getClientIp();
+
+        $visitorLog->logVisit($ipaddress);
 
         $mda = $this->getDoctrine()
             ->getRepository(mda::class)
@@ -188,7 +171,8 @@ class PagesController extends Controller
                 'trainings' => $training,
                 'date' => $date,
                 'trainlet' => $training_letter,
-                'train_letter_continue' => $training_letter_main
+                'train_letter_continue' => $training_letter_main,
+                'visitor_metrics' => $visitorLog->todayVisits()
             ));
 
 
@@ -201,7 +185,7 @@ class PagesController extends Controller
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
      */
-    public function mda_letter(Request $request, \Swift_Mailer $mailer)
+    public function mda_letter(Request $request, VisitorLog $visitorLog, \Swift_Mailer $mailer)
     {
 
         $mda = $this->getDoctrine()
@@ -212,38 +196,53 @@ class PagesController extends Controller
 
         $training_type = $request->request->get('training_type');
         $training_id = $request->request->get('training');
+        $email = $request->request->get('email');
+        $phone = $request->request->get('phone');
 
+        $ipaddress = $request->getClientIp();
+
+        $visitorLog->logVisit($ipaddress);
 
 
         if(!empty($request->request->get('mda'))) {
 
-            $training = $this->getDoctrine()
-                ->getRepository(Training::class)
-                ->find($training_id);
+            $mda_participant = $this->getDoctrine()
+                ->getRepository(MdaParticipant::class)
+                ->findBy([
+                    'mda_code' => $mda->getMdaCode(),
+                    'email' => $email,
+                    'phone' => $phone
+                ]);
+
+            if(count($mda_participant) >= 1) {
+                $training = $this->getDoctrine()->getRepository(Training::class)->find($training_id);
 
 
+                $date = date("jS F, Y");
 
-            $date = date("jS F, Y");
+                if($training_type == "Refresher training")
+                {
+                    $training_letter = $training->getRefresherLetterContent();
+                }elseif($training_type == "New training") {
+                    $training_letter = $training->getLetterContent();
+                }
+
+                $training_letter_main = str_replace("[MDA-CODE]", $mda->getMdaCode(), $training_letter);
+
+                /*$training_letter = preg_replace('/\s+?(\S+)?$/', '', substr($training_letter_main, 0, 2038));
+                $training_letter2 = preg_replace('/\s+?(\S+)?$/', '', substr($training_letter_main, 2038, 10000000000));*/
 
 
+                return $this->render('pages/letter.html.twig', array('mda' => $mda, 'trainings' => $training, 'date' => $date, 'trainlet' => $training_letter, 'train_letter_continue' => $training_letter_main, 'visitor_metrics' => $visitorLog->todayVisits()));
 
 
-            $training_letter = $training->getLetterContent();
+            }else{
 
-            $training_letter_main = str_replace("[MDA-CODE]", $mda->getMdaCode(), $training_letter);
+                $this->addFlash('error', 'Incorrect MDA Administrator email and phone number. Please register as the MDA administrator with your MDA code to print your training letter');
 
-            /*$training_letter = preg_replace('/\s+?(\S+)?$/', '', substr($training_letter_main, 0, 2038));
-            $training_letter2 = preg_replace('/\s+?(\S+)?$/', '', substr($training_letter_main, 2038, 10000000000));*/
+                return $this->redirectToRoute('generate_letter_step_2', [ 'mda' => $mda->getMdaCode() ]);
 
-
-
-            return $this->render('pages/letter.html.twig', array(
-                'mda' => $mda,
-                'trainings' => $training,
-                'date' => $date,
-                'trainlet' => $training_letter,
-                'train_letter_continue' => $training_letter_main
-            ));
+            }
 
         }else{
             return $this->redirectToRoute('home');
@@ -259,7 +258,7 @@ class PagesController extends Controller
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
      */
-    public function mda_2letter(Request $request, \Swift_Mailer $mailer)
+    public function mda_2letter(Request $request, VisitorLog $visitorLog, \Swift_Mailer $mailer)
     {
 
         $mda = $this->getDoctrine()
@@ -272,6 +271,9 @@ class PagesController extends Controller
         $training_id = $request->request->get('training');
 
 
+        $ipaddress = $request->getClientIp();
+
+        $visitorLog->logVisit($ipaddress);
 
         if(!empty($request->request->get('mda'))) {
 
@@ -337,7 +339,8 @@ class PagesController extends Controller
                     'trainings' => $training,
                     'date' => $date,
                     'trainlet' => $training_letter,
-                    'train_letter_continue' => $training_letter2
+                    'train_letter_continue' => $training_letter2,
+                    'visitor_metrics' => $visitorLog->todayVisits()
                 )
             );
 

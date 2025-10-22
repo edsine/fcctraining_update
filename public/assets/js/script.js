@@ -7,6 +7,8 @@ function isNumber(evt) {
         return true;
 }
 
+
+
 $(document).ready(function() {
 
     $('select').select2();
@@ -37,9 +39,19 @@ timeago().render($('.time_ago'));
 
 });
 
-$("#add_participant").click(function () {
-    $("#training_form_participants").append("<div class='bg-gray p-3 mb-3'> <div class='form-group'> <label>Participant name</label> <input type='text' class='form-control' required='required' name='participants[]'> </div> <div class='form-group'> <label>Participant email</label> <input type='email' class='form-control' required='required' name='participants_email[]'> </div> <div class='form-group'> <label>Participant phone</label> <input type='text' class='form-control' onkeypress='return isNumber(event)' name='participants_phone[]'></div></div>");
-});
+
+
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+    s1.async=true;
+    s1.src='https://embed.tawk.to/5a859b984b401e45400cf58b/default';
+    s1.charset='UTF-8';
+    s1.setAttribute('crossorigin','*');
+    s0.parentNode.insertBefore(s1,s0);
+})();
+
+
 
 
 
@@ -57,11 +69,32 @@ function printElem(divId) {
     var mywindow = window.open('', 'Print', 'height=600,width=800');
 
     mywindow.document.write('<html><head><title>Print</title>');
-    mywindow.document.write('<link rel="stylesheet" href="../../../assets/css/bootstrap.min.css" media="screen, print" type="text/style">');
-    //mywindow.document.write('<link rel="stylesheet" href="../../../assets/look_css/css/look_base_v2.css" type="text/style">');
+    mywindow.document.write('<link rel="stylesheet" href="http://localhost/pgl/project_cornerstone3/public/assets/css/bootstrap.min.css" media="screen, print" type="text/style">');
+    mywindow.document.write('<link rel="stylesheet" href="../../../assets/look_css/css/look_base_v2.css" type="text/style">');
     mywindow.document.write('<link rel="stylesheet" href="../../../assets/css/style.css" type="text/style">');
 
-    mywindow.document.write(" <style>* {font-family: 'Times New Roman' !important; font-size:15px !Important}body{padding: 20px 70px !Important;color:#000 !Important}body a{color:#000 !Important;}.font-weight-900{font-weight: 900 !Important;}body p font,  p font b, p b u,  p b{font-family: 'Times New Roman' !important;font-size: 16px !Important;}img{font-family: 'Times New Roman' !important;-webkit-print-color-adjust: exact !Important;font-size: 14px !Important;margin-bottom: 20px !Important;}</style>");
+    mywindow.document.write(" <style>* {font-family: 'Times New Roman' !important; font-size:15px !Important; }body{padding: 20px 70px !Important;color:#000 !Important}body a{color:#000 !Important;}.font-weight-900{font-weight: 900 !Important;} .float-right{float:right !Important} .m-0{ margin:0 !Important } body p font,  p font b, p b u,  p b{font-family: 'Times New Roman' !important;font-size: 16px !Important;}img{font-family: 'Times New Roman' !important;-webkit-print-color-adjust: exact !Important;font-size: 14px !Important;margin-bottom: 20px !Important;}</style>");
+    mywindow.document.write('</head><body >');
+    mywindow.document.write(content);
+    mywindow.document.write('</body></html>');
+
+    mywindow.document.close();
+    mywindow.focus()
+    mywindow.print();
+    //mywindow.close();
+    return true;
+}
+
+function printElem2(divId) {
+    var content = document.getElementById(divId).innerHTML;
+    var mywindow = window.open('', 'Print', 'height=600,width=800');
+
+    mywindow.document.write('<html><head><title>Print</title>');
+    mywindow.document.write('<link rel="stylesheet" href="http://localhost/pgl/project_cornerstone3/public/assets/css/bootstrap.min.css" media="screen, print" type="text/style">');
+    mywindow.document.write('<link rel="stylesheet" href="../../../assets/look_css/css/look_base_v2.css" type="text/style">');
+    mywindow.document.write('<link rel="stylesheet" href="../../../assets/css/style.css" type="text/style">');
+
+
     mywindow.document.write('</head><body >');
     mywindow.document.write(content);
     mywindow.document.write('</body></html>');

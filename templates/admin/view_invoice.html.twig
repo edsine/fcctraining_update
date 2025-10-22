@@ -2,19 +2,24 @@
 
 {% block body %}
 
-{% if invoice.paymentstatus == 1 and invoice.paymentmethod == 'Cash' or invoice.paymentmethod == 'Bank Transfer' %}
+
 {% if invoice.paymentevidence == NULL %}
     <div class="card">
 
         <div class="card-header bg-red font-white">
-            <h4>Upload payment evidence</h4>
+            <h4>Payment evidence</h4>
         </div>
 
         <div class="card-body">
 
-            {{ form_start(form) }}
-            {{ form_widget(form) }}
-            {{ form_end(form) }}
+            <div class="alert alert-danger">Awaiting user to upload payment evidence</div>
+
+
+
+                    {{ form_start(form) }}
+                    {{ form_widget(form) }}
+                    {{ form_end(form) }}
+
 
         </div>
 
@@ -24,11 +29,18 @@
         <div class="card">
 
             <div class="card-header bg-success font-white">
-                <button class="btn float-right btn-xs btn-primary btn-xs mr-2" onclick="printElem('pay_evidence');"><i class="fa fa-print"></i> Print</button>
+                <button class="btn float-right btn-xs btn-primary btn-xs mr-2" onclick="printElem2('pay_evidence');"><i class="fa fa-print"></i> Print</button>
                 <h4>Payment evidence</h4>
             </div>
 
             <div class="card-body" id="pay_evidence">
+
+                <div class="bg-gray p-3">
+                    <p>Update payment evidence</p>
+                    {{ form_start(form) }}
+                    {{ form_widget(form) }}
+                    {{ form_end(form) }}
+                </div>
 
               <img src="{{ asset(invoice.paymentevidence) }}" class="img-fluid">
 
@@ -38,18 +50,26 @@
 
         {% endif %}
 
-    {% endif %}
+
 
     <div class="card">
         <div class="card-header bg-dark font-white">
+
+            <h2 CLASS="text-white float-left">Confirm payment from MDA</h2>
             <div class="float-right d-flex">
-                <button class="btn btn-xs btn-primary btn-xs mr-2" onclick="printElem('letter');"><i class="fa fa-print"></i> Print</button>
+                <button class="btn btn-xs btn-primary btn-xs mr-2" onclick="printElem2('letter');"><i class="fa fa-print"></i> Print</button>
+
 
                 {% if invoice.paymentstatus == 0 %}
-                    <a href="{{ path('admin_pay_invoice_undertaken', { 'id':invoice.id }) }}" class="btn btn-xs btn-success mr-2"><i class="fa fa-file"></i> Pay with Undertaken</a>
-                    <a href="{{ path('admin_pay_invoice_cash', { 'id':invoice.id }) }}" class="btn btn-xs btn-success mr-2"><i class="fa fa-money"></i> Pay with Cash</a>
-                    <a href="{{ path('admin_pay_invoice_bank', { 'id':invoice.id }) }}" class="btn btn-xs btn-success"><i class="fa fa-institution"></i> Pay by Bank transfer</a>
+                    <a href="{{ path('admin_pay_invoice_undertaken', { 'id':invoice.id }) }}" class="btn btn-xs btn-success mr-2" onclick="return confirm('Are you sure you want to confirm this MDA will pay with Undertaken?')"><i class="fa fa-file"></i> Pay with Undertaken</a>
+                    <a href="{{ path('admin_pay_invoice_cash', { 'id':invoice.id }) }}" class="btn btn-xs btn-success mr-2" onclick="return confirm('Are you sure you want to confirm this MDA paid cash?')"><i class="fa fa-money"></i> Paid with Cash</a>
+                    <a href="{{ path('admin_pay_invoice_online', { 'id':invoice.id }) }}" class="btn btn-xs btn-success mr-2" onclick="return confirm('Are you sure you want to confirm this MDA made payment online?')"><i class="fa fa-money"></i> Paid Online</a>
+
+                    {% if invoice.paymentevidence != NULL %}
+                    <a href="{{ path('admin_pay_invoice_bank', { 'id':invoice.id }) }}" class="btn btn-xs btn-success"><i class="fa fa-institution"></i> Paid by Bank transfer</a>
+                        {% endif %}
                 {% endif %}
+
 
             </div>
             Invoice
@@ -220,6 +240,8 @@
 
                         </div>
 
+                        <p class="mt-3">After making payment, scan a copy of the reciept, attach and send as mail to payment@pglnigeria.com stating your MDA name and invoice no.</p>
+
                         <img src="{{ asset('assets/images/pay_logo.png') }}" class="img-fluid mt-4 w-75">
 
                     {% endif %}
@@ -233,9 +255,38 @@
 
 
 
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-6">
 
 
-        </ul>
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5>Log</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                    {% for log in invoice_log %}
+
+
+                        <li class="list-group-item">
+                            {{ log.status }}
+                            <p class="text-primary">by {{ log.userid.username }}</p>
+                            <p class="font-gray font-xs">{{ log.date|date('jS F, Y h:i:s a') }}</p>
+                        </li>
+
+
+
+
+
+                    {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+        </div>
 
     </div>
 

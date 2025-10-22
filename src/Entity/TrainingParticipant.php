@@ -58,6 +58,14 @@ class TrainingParticipant
     private $attended;
 
     /**
+     * @ORM\Column(type="datetime")
+     */
+    private $date;
+
+
+
+
+    /**
      * @return mixed
      */
     public function getId()
@@ -201,6 +209,22 @@ class TrainingParticipant
     public function setParticipantPhone($participant_phone)
     {
         $this->participant_phone = $participant_phone;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDate()
+    {
+        return $this->date;
+    }
+
+    /**
+     * @param mixed $date
+     */
+    public function setDate($date)
+    {
+        $this->date = $date;
     }
 
 

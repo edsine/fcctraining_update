@@ -6,6 +6,7 @@ use App\Entity\Mda;
 
 
 use App\Entity\MdaParticipant;
+use App\Model\VisitorLog;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -22,8 +23,12 @@ class AccessController extends Controller
     /**
      * @Route("/login", name="login")
      */
-    public function index(AuthenticationUtils $authUtils)
+    public function index(AuthenticationUtils $authUtils, VisitorLog $visitorLog, Request $request)
     {
+
+        $ipaddress = $request->getClientIp();
+
+        $visitorLog->logVisit($ipaddress);
 
             // get the login error if there is one
             $error = $authUtils->getLastAuthenticationError();
@@ -34,15 +39,149 @@ class AccessController extends Controller
         return $this->render('access/login.html.twig', array(
             'last_username' => $lastUsername,
             'error'         => $error,
+            "visitor_metrics" => $visitorLog->todayVisits()
 
         ));
+    }
+
+
+
+    /**
+     * @Route("/reset_password", name="reset_password")
+     */
+    public function reset_password(Request $request, VisitorLog $visitorLog)
+    {
+
+        $ipaddress = $request->getClientIp();
+
+        $visitorLog->logVisit($ipaddress);
+
+
+        $form = $this->createFormBuilder()
+            ->add('Email', TextType::class ,array(
+                'attr' => array(
+                    'class' => 'form-control mb-3',
+                    'placeholder' => 'Enter your email address'
+                )
+            ))
+            ->add('Submit', SubmitType::class, array(
+                'attr' => array(
+                    'class' => 'btn btn-block btn-success'
+                )
+            ))
+            ->getForm();
+
+       $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid())
+        {
+
+            $email = $form["Email"]->getData();
+
+
+            $mda_participant = $this->getDoctrine()
+                ->getRepository(MdaParticipant::class)
+                ->findOneBy([
+                    'email' => $email
+                ]);
+
+            if(count($mda_participant) >= 1)
+            {
+
+                return $this->redirectToRoute('reset_password_2', [ 'id' => $mda_participant->getId() ]);
+
+            }else{
+                $this->addFlash('error', 'Email address does not belong to any account');
+            }
+
+
+        }
+
+
+            return $this->render('access/reset_password.html.twig', array(
+                'form' => $form->createView(),
+                "visitor_metrics" => $visitorLog->todayVisits()
+            ));
+
+
+    }
+
+
+    /**
+     * @Route("/reset_password/{id}", name="reset_password_2")
+     */
+    public function reset_password2(Request $request,$id, VisitorLog $visitorLog, UserPasswordEncoderInterface $encoder)
+    {
+
+        $ipaddress = $request->getClientIp();
+
+        $visitorLog->logVisit($ipaddress);
+
+
+        $mda_participant = $this->getDoctrine()
+            ->getRepository(MdaParticipant::class)
+            ->find($id);
+
+        $form = $this->createFormBuilder()
+            ->add('NewPassword', PasswordType::class ,array(
+                'attr' => array(
+                    'class' => 'form-control mb-3',
+                    'placeholder' => 'Enter your email address'
+                )
+            ))
+            ->add('ConfirmPassword', PasswordType::class ,array(
+                'attr' => array(
+                    'class' => 'form-control mb-3',
+                    'placeholder' => 'Enter your email address'
+                )
+            ))
+            ->add('Update', SubmitType::class, array(
+                'attr' => array(
+                    'class' => 'btn btn-block btn-success'
+                )
+            ))
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid())
+        {
+
+            $pw = $form["NewPassword"]->getData();
+            $confirmpw = $form["ConfirmPassword"]->getData();
+
+            if($pw == $confirmpw)
+            {
+
+                 $mda_participant->setPassword($encoder->encodePassword($mda_participant, $pw));
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($mda_participant);
+                $em->flush();
+
+                $this->addFlash('success', 'Password has been reset, please login');
+                return $this->redirectToRoute('login');
+
+            }else{
+                $this->addFlash('error', 'Passwords do not match');
+            }
+
+
+        }
+
+
+        return $this->render('access/reset_password2.html.twig', array(
+            'form' => $form->createView(),
+            "visitor_metrics" => $visitorLog->todayVisits()
+        ));
+
+
     }
 
 
     /**
      * @Route("/verify", name="verify_mda")
      */
-    public function verify_mda(Request $request)
+    public function verify_mda(Request $request, VisitorLog $visitorLog)
     {
 
 
@@ -59,6 +198,10 @@ class AccessController extends Controller
                 )
             ))
             ->getForm();
+
+        $ipaddress = $request->getClientIp();
+
+        $visitorLog->logVisit($ipaddress);
 
         $form->handleRequest($request);
 
@@ -94,13 +237,15 @@ class AccessController extends Controller
             return $this->render('access/verify_mda.html.twig', array(
                 'form' => $form->createView(),
                 'last_code' => $mda_code,
-                'result' => count($mdaparticipant)
+                'result' => count($mdaparticipant),
+                "visitor_metrics" => $visitorLog->todayVisits()
             ));
 
         }else{
 
             return $this->render('access/verify_mda.html.twig', array(
-                'form' => $form->createView()
+                'form' => $form->createView(),
+                "visitor_metrics" => $visitorLog->todayVisits()
             ));
 
         }
@@ -116,7 +261,7 @@ class AccessController extends Controller
     /**
      * @Route("/register/{mda_code}", name="register")
      */
-    public function register(Request $request, UserPasswordEncoderInterface $encoder, $mda_code)
+    public function register(Request $request, UserPasswordEncoderInterface $encoder, VisitorLog $visitorLog, $mda_code)
     {
 
 
@@ -168,6 +313,10 @@ class AccessController extends Controller
             ->getForm();
 
 
+        $ipaddress = $request->getClientIp();
+
+        $visitorLog->logVisit($ipaddress);
+
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid())
@@ -189,7 +338,8 @@ class AccessController extends Controller
         }
 
         return $this->render('access/register.html.twig',array(
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            "visitor_metrics" => $visitorLog->todayVisits()
         ));
 
 

@@ -46,6 +46,7 @@
                 </div>
                 <div class="card-body p-0">
 
+                    {% if training_participants|length >= 1 %}
                     {% for participant in training_participants %}
 
                         <div class="item d-flex align-items-center">
@@ -59,7 +60,14 @@
 
 
                     {% endfor %}
+                        {% else %}
 
+                            <div class="text-center font-lg p-5">
+                                <p>No registered participant</p>
+
+                            </div>
+
+                            {% endif %}
                 </div>
 
             </div>

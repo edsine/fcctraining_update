@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\AdvancedUserInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UsersRepository")
@@ -35,6 +37,11 @@ class User implements AdvancedUserInterface, \Serializable
      * @ORM\Column(type="text")
      */
     private $password;
+
+    /**
+     * @ORM\Column(type="string")
+     */
+    private $privileges;
 
 
     /**
@@ -259,6 +266,8 @@ class User implements AdvancedUserInterface, \Serializable
         $this->isActive = true;
         // may not be needed, see section on salt below
         // $this->salt = md5(uniqid('', true));
+
+        $this->invoice_log = new ArrayCollection();
     }
 
     /**
@@ -282,5 +291,39 @@ class User implements AdvancedUserInterface, \Serializable
     public function eraseCredentials()
     {
 
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPrivileges()
+    {
+        return $this->privileges;
+    }
+
+    /**
+     * @param mixed $privileges
+     */
+    public function setPrivileges($privileges)
+    {
+        $this->privileges = $privileges;
+    }
+
+
+
+
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\InvoiceLog", mappedBy="invoice_id")
+     */
+    private $invoice_log;
+
+
+    /**
+     * @return Collection|InvoiceLog[]
+     */
+    public function getInvoiceLog()
+    {
+        return $this->invoice_log;
     }
 }
